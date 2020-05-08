@@ -26,13 +26,13 @@ namespace forgotten.Desktop
             }
         }
 
-        public abstract void Draw(Vector2 targetSize);
+        public abstract void Draw(ForgottenGame game, Vector2 targetSize);
 
-        public void DrawTree(Vector2 targetSize)
+        public void DrawTree(ForgottenGame game, Vector2 targetSize)
         {
-            Draw(targetSize);
+            Draw(game, targetSize);
             foreach (KeyValuePair<String,Asset> kvp in children) {
-                kvp.Value.DrawTree(targetSize);
+                kvp.Value.DrawTree(game, targetSize);
             }
         }
     }

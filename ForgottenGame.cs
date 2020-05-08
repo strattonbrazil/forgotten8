@@ -14,15 +14,17 @@ namespace forgotten.Desktop
         SpriteBatch spriteBatch;
         Texture2D system;
 
-        const float WORLD_WIDTH = 16;
-        const float WORLD_HEIGHT = 9;
-
         public ForgottenGame()
         {
             graphics = new GraphicsDeviceManager(this);
             graphics.PreferredBackBufferWidth = 1254;
             graphics.PreferredBackBufferHeight = 716;
             Content.RootDirectory = "Content";
+        }
+
+        public SpriteBatch createSpriteBatch()
+        {
+            return new SpriteBatch(GraphicsDevice);
         }
 
         /// <summary>
@@ -34,74 +36,10 @@ namespace forgotten.Desktop
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-
+            Console.WriteLine("initializing");
             base.Initialize();
 
-            Random rnd = new Random();
-
-            float randomFloat(float range, bool centered = false)
-            {
-                float val = (float)rnd.NextDouble();
-                if (centered)
-                {
-                    val = 2 * val - range;
-                }
-                return val;
-            }
-
-            for (int x = 0; x < WORLD_WIDTH; x++)
-            {
-                for (int y = 0; y < WORLD_HEIGHT; y++)
-                {
-                    const float HALF_WORLD_WIDTH = WORLD_WIDTH * 0.5f;
-                    const float HALF_WORLD_HEIGHT = WORLD_HEIGHT * 0.5f;
-                    Vector2 initPos = new Vector2(x + 0.5f - HALF_WORLD_WIDTH, y + 0.5f - HALF_WORLD_HEIGHT);
-
-                    // TODO: fix this
-                    initPos += new Vector2(randomFloat(0.3f, true), randomFloat(0.3f, true));
-
-                    if (randomFloat(1) > 0.3f)
-                    {
-                        System.systems.Add(new System(initPos));
-                    }
-                }
-            }
-
-            // generate planet names
-            {
-                String[] PLANET_NAMES = {
-                    "Fremulon",
-                    "Erakis",
-                    "Hyporayon",
-                    "Kreeptan",
-                    "Ohlderahn",
-                    "Tarkalis",
-                    "Ooban"
-                };
-                int closestSystemId = -1;
-                float closestD = 1000000;
-                for (int systemId = 0; systemId < System.systems.Count; systemId++)
-                {
-                    System s = System.systems[systemId];
-                    float distance = s.Position.Length();
-                    if (distance < closestD)
-                    {
-                        closestD = distance;
-                        closestSystemId = systemId;
-                    }
-                }
-                System.systems[closestSystemId].Name = "Terragon";
-
-                int count = 0;
-                foreach (System s in System.systems)
-                {
-                    if (s.Name == "")
-                    {
-                        s.Name = PLANET_NAMES[count % PLANET_NAMES.Length];
-                        count++;
-                    }
-                }
-            }
+            this.IsMouseVisible = true;
 
             PaneStack.Instance.push(new GalaxyPane());
         }
@@ -155,11 +93,8 @@ namespace forgotten.Desktop
                 Viewport viewport = graphics.GraphicsDevice.Viewport;
                 Vector2 targetSize = new Vector2(viewport.Width, viewport.Height);
                 pane.UpdateTree(targetSize, gameTime);
-                pane.Draw(targetSize);
+                pane.DrawTree(this, targetSize);
             }
-            spriteBatch.Begin();
-            spriteBatch.Draw(system, new Vector2(0, 0));
-            spriteBatch.End();
             base.Draw(gameTime);
         }
     }

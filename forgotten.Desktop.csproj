@@ -50,7 +50,7 @@
     <Compile Include="PaneStack.cs" />
     <Compile Include="GalaxyPane.cs" />
     <Compile Include="Asset.cs" />
-    <Compile Include="RectAsset.cs" />
+    <Compile Include="ScreenUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework">
