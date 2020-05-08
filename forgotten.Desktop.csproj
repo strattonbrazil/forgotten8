@@ -51,6 +51,7 @@
     <Compile Include="GalaxyPane.cs" />
     <Compile Include="Asset.cs" />
     <Compile Include="ScreenUtils.cs" />
+    <Compile Include="MouseTracker.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework">

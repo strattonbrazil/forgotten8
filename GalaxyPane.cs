@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace forgotten.Desktop
 {
@@ -8,9 +9,18 @@ namespace forgotten.Desktop
     {
         private SpriteBatch spriteBatch;
         private Texture2D systemTexture;
+        private Texture2D playerTexture;
+        private Texture2D dummyTexture;
+
+        private System hoverSystem;
+        private System dstSystem;
+        private Vector2 playerPos = new Vector2(0,0);
 
         const float WORLD_WIDTH = 16;
         const float WORLD_HEIGHT = 9;
+        const int SYSTEM_HIT_R = 15;
+
+        MouseTracker mouseTracker = new MouseTracker();
 
         public GalaxyPane()
         {
@@ -82,8 +92,55 @@ namespace forgotten.Desktop
             }
         }
 
+        // given point on the screen identify the cursor
+        public System GetSystem(Vector2 targetSize, Point p)
+        {
+            Vector2 worldSize = new Vector2(WORLD_WIDTH, WORLD_HEIGHT);
+            ScreenUtils su = new ScreenUtils(targetSize, worldSize, 40);
+
+            foreach (System system in System.systems)
+            {
+                Vector2 screenPos = su.WorldToScreen(system.Position);
+                Rectangle screenRect = new Rectangle((int)screenPos.X - SYSTEM_HIT_R, (int)screenPos.Y - SYSTEM_HIT_R,
+                                                     SYSTEM_HIT_R * 2, SYSTEM_HIT_R * 2);
+                if (screenRect.Contains(p))
+                {
+                    return system;
+                }
+            }
+            return null;
+        }
+
         public override void Update(Vector2 targetSize, GameTime gameTime)
         {
+            MouseState ms = Mouse.GetState();
+            mouseTracker.Update(ms);
+            hoverSystem = GetSystem(targetSize, ms.Position);
+
+            if (mouseTracker.WasPressed() && hoverSystem != null && dstSystem == null)
+            {
+                dstSystem = hoverSystem;
+            }
+
+            float worldVelocity = 0.2f;
+            if (dstSystem != null)
+            {
+                Vector2 dstPos = dstSystem.Position;
+                Vector2 dir = Vector2.Normalize(dstPos - playerPos);
+
+                float distanceTraveled = worldVelocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                playerPos = playerPos + (dir * distanceTraveled);
+
+                if (Vector2.Distance(playerPos, dstPos) < distanceTraveled)
+                { // arrived
+                    Console.WriteLine("arrived!");
+                    dstSystem = null;
+                  // emit new system pane
+                    //PaneStack::instance()->push(new SystemPane(systems[_dstSystemId]));
+                    //_dstSystemId = -1;
+                }
+            }
+
             //throw new NotImplementedException();
         }
 
@@ -93,6 +150,20 @@ namespace forgotten.Desktop
             {
                 spriteBatch = game.createSpriteBatch();
                 systemTexture = game.Content.Load<Texture2D>("system");
+
+                const int PLAYER_WIDTH = 8;
+                const int PLAYER_HEIGHT = 12;
+                playerTexture = new Texture2D(game.GraphicsDevice, PLAYER_WIDTH, PLAYER_HEIGHT);
+                Color[] data = new Color[PLAYER_WIDTH * PLAYER_HEIGHT];
+                for (int i = 0; i < PLAYER_WIDTH * PLAYER_HEIGHT; i++)
+                {
+                    data[i] = Color.CornflowerBlue;
+                }
+                playerTexture.SetData(data);
+
+                dummyTexture = new Texture2D(game.GraphicsDevice, 1, 1);
+                Color[] dummyData = new Color[] { Color.White };
+                dummyTexture.SetData(dummyData);
             }
 
             Vector2 worldSize = new Vector2(WORLD_WIDTH, WORLD_HEIGHT);
@@ -100,22 +171,16 @@ namespace forgotten.Desktop
 
             spriteBatch.Begin();
 
-            foreach (System system in System.systems)
+            // draw hover system
+            if (hoverSystem != null)
             {
-                // draw hover text
+                Vector2 hoverPos = su.WorldToScreen(hoverSystem.Position) - new Vector2(SYSTEM_HIT_R, SYSTEM_HIT_R);
 
-                float spriteRadius = system.Size;
-                Vector2 screenPos = su.WorldToScreen(system.Position) - new Vector2(spriteRadius, spriteRadius);
-                //spriteBatch.Draw(systemTexture, screenPos);
-
-                //Rectangle dstRect = new Rectangle(screenPos, new Vector2(spriteRadius * 2, spriteRadius * 2));
-                //dstRect.
-                float texToScreenRatio = spriteRadius * 2.0f / systemTexture.Width;
-                Vector2 texToScreen = new Vector2(texToScreenRatio, texToScreenRatio);
-                spriteBatch.Draw(systemTexture, 
-                                 screenPos, 
+                Vector2 texToScreen = new Vector2(SYSTEM_HIT_R*2, SYSTEM_HIT_R*2);
+                spriteBatch.Draw(dummyTexture,
+                                 hoverPos,
                                  null, // source rect
-                                 system.Color,
+                                 Color.YellowGreen,
                                  0,
                                  Vector2.Zero,
                                  texToScreen,
@@ -123,44 +188,33 @@ namespace forgotten.Desktop
                                  0);
             }
 
-            spriteBatch.End();
-
-            /*
-            for (int systemId = 0; systemId < systems.size(); systemId++)
+            foreach (System system in System.systems)
             {
-                SystemPtr s = systems[systemId];
-                // draw background
-                if (systemId == _systemHoverId)
-                {
-                    sf::Vector2f screenPos = su.worldToScreen(s->pos());
-                    //sf::Rect<float> bounds(screenPos.x - 5, screenPos.y - 5, 10, 10);
-                    sf::RectangleShape hitBox;
-                    hitBox.setPosition(screenPos.x - SYSTEM_HIT_R, screenPos.y - SYSTEM_HIT_R);
-                    hitBox.setSize(sf::Vector2f(SYSTEM_HIT_R * 2, SYSTEM_HIT_R * 2));
-                    hitBox.setFillColor(sf::Color(255, 255, 0));
-                    target.draw(hitBox);
-                }
+                // draw system
+                //
+                float spriteRadius = system.Size;
+                Vector2 systemScreenPos = su.WorldToScreen(system.Position) - new Vector2(spriteRadius, spriteRadius);
 
-                int spriteRadius = s->size();
-                systemSprite.setPosition(su.worldToScreen(s->pos()) - sf::Vector2f(spriteRadius, spriteRadius));
-                resizeSprite(systemSprite, spriteRadius * 2, spriteRadius * 2);
-                systemSprite.setColor(s->color());
-                target.draw(systemSprite);
+                float texToScreenRatio = spriteRadius * 2.0f / systemTexture.Width;
+                Vector2 texToScreen = new Vector2(texToScreenRatio, texToScreenRatio);
+                spriteBatch.Draw(systemTexture, 
+                                 systemScreenPos, 
+                                 null, // source rect
+                                 system.Color,
+                                 0,
+                                 Vector2.Zero,
+                                 texToScreen,
+                                 SpriteEffects.None,
+                                 0);
+                                 
+            }
 
-                sf::Text text(s->name(), font, 14);
-            float nameWidth = text.getGlobalBounds().width;
-            sf::Vector2f textPosition = round(su.worldToScreen(s->pos()) + sf::Vector2f(-nameWidth * 0.5, 10));
-            text.setPosition(textPosition);
-            target.draw(text);
-        }
+            // draw player
+            //
+            Vector2 screenPos = su.WorldToScreen(playerPos);
+            spriteBatch.Draw(playerTexture, screenPos);
 
-        sf::CircleShape player(playerSizeP);
-        player.setFillColor(sf::Color(150, 50, 250));
-    player.setPosition(su.worldToScreen(_playerPos) - sf::Vector2f(playerSizeP, playerSizeP));
-    target.draw(player);
-
-*/
-
+            spriteBatch.End();
         }
     }
 }
