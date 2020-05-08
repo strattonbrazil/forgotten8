@@ -10,6 +10,7 @@ namespace forgotten.Desktop
 
         public MouseTracker()
         {
+
         }
 
         public void Update(MouseState ms)

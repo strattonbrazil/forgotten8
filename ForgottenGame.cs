@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -22,9 +23,17 @@ namespace forgotten.Desktop
             Content.RootDirectory = "Content";
         }
 
-        public SpriteBatch createSpriteBatch()
+        public SpriteBatch CreateSpriteBatch()
         {
             return new SpriteBatch(GraphicsDevice);
+        }
+
+        public Texture2D CreateDummyTexture()
+        {
+            var dummyTexture = new Texture2D(GraphicsDevice, 1, 1);
+            Color[] dummyData = new Color[] { Color.White };
+            dummyTexture.SetData(dummyData);
+            return dummyTexture;
         }
 
         /// <summary>
@@ -40,6 +49,8 @@ namespace forgotten.Desktop
             base.Initialize();
 
             this.IsMouseVisible = true;
+            this.Window.AllowUserResizing = true;
+
 
             PaneStack.Instance.push(new GalaxyPane());
         }
@@ -88,7 +99,9 @@ namespace forgotten.Desktop
         {
             GraphicsDevice.Clear(Color.Black);
 
-            foreach (Pane pane in PaneStack.Instance.panes)
+            // save panes list off so new panes can be pushed during loop
+            List<Pane> currentPanes = new List<Pane>(PaneStack.Instance.panes);
+            foreach (Pane pane in currentPanes)
             {
                 Viewport viewport = graphics.GraphicsDevice.Viewport;
                 Vector2 targetSize = new Vector2(viewport.Width, viewport.Height);

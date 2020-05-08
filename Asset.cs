@@ -8,10 +8,25 @@ namespace forgotten.Desktop
     {
         protected List<KeyValuePair<String, Asset>> children = new List<KeyValuePair<string, Asset>>();
 
+        public Asset Parent;
+
         public Vector2 Position { get; set; } = new Vector2();
+
+        public Vector2 AbsolutePosition()
+        {
+            var pos = Position;
+            var parent = this.Parent;
+            while (parent != null)
+            {
+                pos += parent.Position;
+                parent = parent.Parent;
+            }
+            return pos;
+        }
 
         public void addChild(String name, Asset asset)
         {
+            asset.Parent = this;
             children.Add(new KeyValuePair<string, Asset>(name, asset));
         }
 

@@ -11,6 +11,7 @@ namespace forgotten.Desktop
         private Texture2D systemTexture;
         private Texture2D playerTexture;
         private Texture2D dummyTexture;
+        private SpriteFont normalFont;
 
         private System hoverSystem;
         private System dstSystem;
@@ -83,7 +84,7 @@ namespace forgotten.Desktop
                 int count = 0;
                 foreach (System s in System.systems)
                 {
-                    if (s.Name == "")
+                    if (s.Name == null)
                     {
                         s.Name = PLANET_NAMES[count % PLANET_NAMES.Length];
                         count++;
@@ -134,10 +135,8 @@ namespace forgotten.Desktop
                 if (Vector2.Distance(playerPos, dstPos) < distanceTraveled)
                 { // arrived
                     Console.WriteLine("arrived!");
+                    PaneStack.Instance.push(new SystemPane(dstSystem));
                     dstSystem = null;
-                  // emit new system pane
-                    //PaneStack::instance()->push(new SystemPane(systems[_dstSystemId]));
-                    //_dstSystemId = -1;
                 }
             }
 
@@ -148,7 +147,7 @@ namespace forgotten.Desktop
         {
             if (spriteBatch == null)
             {
-                spriteBatch = game.createSpriteBatch();
+                spriteBatch = game.CreateSpriteBatch();
                 systemTexture = game.Content.Load<Texture2D>("system");
 
                 const int PLAYER_WIDTH = 8;
@@ -161,9 +160,9 @@ namespace forgotten.Desktop
                 }
                 playerTexture.SetData(data);
 
-                dummyTexture = new Texture2D(game.GraphicsDevice, 1, 1);
-                Color[] dummyData = new Color[] { Color.White };
-                dummyTexture.SetData(dummyData);
+                dummyTexture = game.CreateDummyTexture(); 
+
+                normalFont = game.Content.Load<SpriteFont>("Galaxy_normal");
             }
 
             Vector2 worldSize = new Vector2(WORLD_WIDTH, WORLD_HEIGHT);
@@ -206,7 +205,11 @@ namespace forgotten.Desktop
                                  texToScreen,
                                  SpriteEffects.None,
                                  0);
-                                 
+
+                float nameWidth = normalFont.MeasureString(system.Name).X;
+                Vector2 namePos = su.WorldToScreen(system.Position) + new Vector2(-nameWidth * 0.5f, 10);
+                namePos = new Vector2((int)namePos.X, (int)namePos.Y);
+                spriteBatch.DrawString(normalFont, system.Name, namePos, Color.White);
             }
 
             // draw player
@@ -215,6 +218,43 @@ namespace forgotten.Desktop
             spriteBatch.Draw(playerTexture, screenPos);
 
             spriteBatch.End();
+
+            /*
+            for (int systemId = 0; systemId < systems.size(); systemId++)
+            {
+                SystemPtr s = systems[systemId];
+                // draw background
+                if (systemId == _systemHoverId)
+                {
+                    sf::Vector2f screenPos = su.worldToScreen(s->pos());
+                    //sf::Rect<float> bounds(screenPos.x - 5, screenPos.y - 5, 10, 10);
+                    sf::RectangleShape hitBox;
+                    hitBox.setPosition(screenPos.x - SYSTEM_HIT_R, screenPos.y - SYSTEM_HIT_R);
+                    hitBox.setSize(sf::Vector2f(SYSTEM_HIT_R * 2, SYSTEM_HIT_R * 2));
+                    hitBox.setFillColor(sf::Color(255, 255, 0));
+                    target.draw(hitBox);
+                }
+
+                int spriteRadius = s->size();
+                systemSprite.setPosition(su.worldToScreen(s->pos()) - sf::Vector2f(spriteRadius, spriteRadius));
+                resizeSprite(systemSprite, spriteRadius * 2, spriteRadius * 2);
+                systemSprite.setColor(s->color());
+                target.draw(systemSprite);
+
+                sf::Text text(s->name(), font, 14);
+            float nameWidth = text.getGlobalBounds().width;
+            sf::Vector2f textPosition = round(su.worldToScreen(s->pos()) + sf::Vector2f(-nameWidth * 0.5, 10));
+            text.setPosition(textPosition);
+            target.draw(text);
+        }
+
+        sf::CircleShape player(playerSizeP);
+        player.setFillColor(sf::Color(150, 50, 250));
+    player.setPosition(su.worldToScreen(_playerPos) - sf::Vector2f(playerSizeP, playerSizeP));
+    target.draw(player);
+
+*/
+
         }
     }
 }

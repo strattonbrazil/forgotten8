@@ -52,6 +52,7 @@
     <Compile Include="Asset.cs" />
     <Compile Include="ScreenUtils.cs" />
     <Compile Include="MouseTracker.cs" />
+    <Compile Include="SystemPane.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework">
