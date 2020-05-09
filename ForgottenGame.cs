@@ -13,7 +13,8 @@ namespace forgotten.Desktop
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        Texture2D system;
+        Texture2D dummyTexture;
+
 
         public ForgottenGame()
         {
@@ -51,7 +52,6 @@ namespace forgotten.Desktop
             this.IsMouseVisible = true;
             this.Window.AllowUserResizing = true;
 
-
             PaneStack.Instance.push(new GalaxyPane());
         }
 
@@ -64,7 +64,7 @@ namespace forgotten.Desktop
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            system = this.Content.Load<Texture2D>("system");
+            dummyTexture = CreateDummyTexture();
         }
 
         /// <summary>
@@ -83,10 +83,22 @@ namespace forgotten.Desktop
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
 
-            // TODO: Add your update logic here
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+            {
+                if (PaneStack.Instance.panes.Count == 1)
+                    Exit();
+            }
+
+
+            Viewport viewport = graphics.GraphicsDevice.Viewport;
+            Vector2 targetSize = new Vector2(viewport.Width, viewport.Height);
+
+            List<Pane> currentPanes = new List<Pane>(PaneStack.Instance.panes);
+            foreach (Pane pane in currentPanes)
+            {
+                pane.UpdateTree(targetSize, gameTime);
+            }
 
             base.Update(gameTime);
         }
@@ -99,13 +111,23 @@ namespace forgotten.Desktop
         {
             GraphicsDevice.Clear(Color.Black);
 
-            // save panes list off so new panes can be pushed during loop
-            List<Pane> currentPanes = new List<Pane>(PaneStack.Instance.panes);
-            foreach (Pane pane in currentPanes)
+            Viewport viewport = graphics.GraphicsDevice.Viewport;
+            Vector2 targetSize = new Vector2(viewport.Width, viewport.Height);
+
+            foreach (Pane pane in PaneStack.Instance.panes)
             {
-                Viewport viewport = graphics.GraphicsDevice.Viewport;
-                Vector2 targetSize = new Vector2(viewport.Width, viewport.Height);
-                pane.UpdateTree(targetSize, gameTime);
+                spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+                spriteBatch.Draw(dummyTexture,
+                                 Vector2.Zero,
+                                 null, // source rect
+                                 Color.Black * 0.8f,
+                                 0,
+                                 Vector2.Zero,
+                                 targetSize,
+                                 SpriteEffects.None,
+                                 0);
+                spriteBatch.End();
+
                 pane.DrawTree(this, targetSize);
             }
             base.Draw(gameTime);
