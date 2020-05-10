@@ -47,11 +47,11 @@ namespace forgotten.Desktop
 
                     // TODO: fix this
                     initPos += new Vector2(randomFloat(0.3f, true), randomFloat(0.3f, true));
-                    //Console.WriteLine(randomFloat(0.3f, true));
-
                     if (randomFloat(1) > 0.3f)
                     {
-                        System.systems.Add(new System(initPos));
+                        System system = new System(initPos);
+                        system.Difficulty = initPos.Length() / new Vector2(HALF_WORLD_WIDTH, HALF_WORLD_HEIGHT).Length();
+                        System.systems.Add(system);
                     }
                 }
             }
@@ -191,7 +191,7 @@ namespace forgotten.Desktop
             {
                 // draw system
                 //
-                float spriteRadius = system.Size;
+                float spriteRadius = 3 + (int)Math.Ceiling(Math.Sqrt(system.planets.Count));
                 Vector2 systemScreenPos = su.WorldToScreen(system.Position) - new Vector2(spriteRadius, spriteRadius);
 
                 float texToScreenRatio = spriteRadius * 2.0f / systemTexture.Width;

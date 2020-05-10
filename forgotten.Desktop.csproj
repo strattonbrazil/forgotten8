@@ -53,6 +53,8 @@
     <Compile Include="ScreenUtils.cs" />
     <Compile Include="MouseTracker.cs" />
     <Compile Include="SystemPane.cs" />
+    <Compile Include="TextAsset.cs" />
+    <Compile Include="Planet.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework">

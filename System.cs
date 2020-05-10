@@ -8,8 +8,10 @@ namespace forgotten.Desktop
     {
         public Vector2 Position { get; set; }
         public String Name { get; set; }
-        public float Size { get; set; } // screen radius
         public Color Color { get; set; }
+        public float Difficulty;
+
+        public List<Planet> planets = new List<Planet>();
 
         public static List<System> systems = new List<System>();
 
@@ -18,7 +20,6 @@ namespace forgotten.Desktop
             this.Position = position;
 
             Random rnd = new Random();
-            Size = (float)rnd.NextDouble() * 3 + 3;
 
             float colorSpace = (float)rnd.NextDouble();
             if (colorSpace < .3)
@@ -32,6 +33,34 @@ namespace forgotten.Desktop
             else
             {
                 Color = new Color(250, 250, 150);
+            }
+
+            float planetRnd = (float)rnd.NextDouble();
+            if (planetRnd < 0.1)
+            {
+                addPlanets(2);
+            } 
+            else if (planetRnd < 0.3)
+            {
+                addPlanets(3);
+            } 
+            else if (planetRnd < 0.6)
+            {
+                addPlanets(4);
+            }
+            else if (planetRnd < 0.8)
+            {
+                addPlanets(5 + (int)(3*rnd.NextDouble()));
+            }
+        }
+
+        private void addPlanets(int numPlanets)
+        {
+            for (int i = 0; i < numPlanets; i++)
+            {
+                String name = "Planet " + (i + 1);
+                Planet planet = new Planet(name);
+                planets.Add(planet);
             }
         }
 

@@ -24,10 +24,11 @@ namespace forgotten.Desktop
             return pos;
         }
 
-        public void addChild(String name, Asset asset)
+        public Asset addChild(String name, Asset asset)
         {
             asset.Parent = this;
             children.Add(new KeyValuePair<string, Asset>(name, asset));
+            return asset;
         }
 
         public abstract void Update(Vector2 targetSize, GameTime gameTime);
