@@ -14,7 +14,7 @@ namespace forgotten.Desktop
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         Texture2D dummyTexture;
-
+        bool escapeWasDown = false;
 
         public ForgottenGame()
         {
@@ -84,11 +84,14 @@ namespace forgotten.Desktop
         protected override void Update(GameTime gameTime)
         {
 
-            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (!escapeWasDown && Keyboard.GetState().IsKeyDown(Keys.Escape))
             {
                 if (PaneStack.Instance.panes.Count == 1)
                     Exit();
+                else
+                    PaneStack.Instance.panes.RemoveAt(PaneStack.Instance.panes.Count - 1);
             }
+            escapeWasDown = Keyboard.GetState().IsKeyDown(Keys.Escape);
 
 
             Viewport viewport = graphics.GraphicsDevice.Viewport;
