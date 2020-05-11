@@ -25,7 +25,7 @@ namespace forgotten.Desktop
 
         public GalaxyPane()
         {
-            Random rnd = new Random();
+            GameRandom rnd = GameRandom.Instance;
 
             float randomFloat(float range, bool centered = false)
             {

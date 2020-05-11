@@ -19,7 +19,7 @@ namespace forgotten.Desktop
         {
             this.Position = position;
 
-            Random rnd = new Random();
+            GameRandom rnd = GameRandom.Instance;
 
             float colorSpace = (float)rnd.NextDouble();
             if (colorSpace < .3)
@@ -34,6 +34,7 @@ namespace forgotten.Desktop
             {
                 Color = new Color(250, 250, 150);
             }
+
 
             float planetRnd = (float)rnd.NextDouble();
             if (planetRnd < 0.1)
@@ -58,10 +59,48 @@ namespace forgotten.Desktop
         {
             for (int i = 0; i < numPlanets; i++)
             {
-                String name = "Planet " + (i + 1);
+                String name = generatePlanetName();
                 Planet planet = new Planet(name);
                 planets.Add(planet);
             }
+        }
+
+        private String generatePlanetName()
+        {
+            var rnd = GameRandom.Instance;
+
+            String[] prefixes =
+            {
+                "Ab",
+                "Ghrub",
+                "Endo",
+                "Tres",
+                "Urs"
+            };
+
+            String[] mids =
+            {
+                "ghar",
+                "mit",
+                "rab",
+                "xel"
+            };
+
+            String[] suffixes =
+            {
+                "nion",
+                "erion",
+                "vi"
+            };
+
+            String name = rnd.Choose(prefixes);
+            if (rnd.nextFloat() < 0.2)
+            {
+                name += rnd.Choose(mids);
+            }
+            name += rnd.Choose(suffixes);
+
+            return name;
         }
 
     }
