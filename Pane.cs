@@ -6,5 +6,10 @@ namespace forgotten.Desktop
 {
     public abstract class Pane : Asset
     {
+        public bool isTopPane()
+        {
+            var panes = PaneStack.Instance.panes;
+            return panes[panes.Count - 1] == this;
+        }
     }
 }

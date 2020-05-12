@@ -118,7 +118,7 @@ namespace forgotten.Desktop
             mouseTracker.Update(ms);
             hoverSystem = GetSystem(targetSize, ms.Position);
 
-            if (mouseTracker.WasPressed() && hoverSystem != null && dstSystem == null)
+            if (isTopPane() && mouseTracker.WasPressed() && hoverSystem != null && dstSystem == null)
             {
                 dstSystem = hoverSystem;
             }
