@@ -55,6 +55,15 @@ namespace forgotten.Desktop
             }
         }
 
+
+        public void SetHomeSystem()
+        {
+            Name = "Terragon";
+            planets.RemoveRange(0, planets.Count);
+            planets.Add(new Planet("Mercury"));
+            planets.Add(new Planet("Terra"));
+        }
+
         private void addPlanets(int numPlanets)
         {
             for (int i = 0; i < numPlanets; i++)

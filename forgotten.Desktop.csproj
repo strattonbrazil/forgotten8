@@ -56,6 +56,7 @@
     <Compile Include="TextAsset.cs" />
     <Compile Include="Planet.cs" />
     <Compile Include="GameRandom.cs" />
+    <Compile Include="PlanetPane.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework">

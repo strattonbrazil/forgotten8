@@ -50,7 +50,7 @@ namespace forgotten.Desktop
                 {
                     Func<bool> onClick = delegate ()
                     {
-                        Console.WriteLine("clicked button: " + planet.Name);
+                        PaneStack.Instance.push(new PlanetPane(planet));
                         return true;
                     };
                     Func<bool,bool> onHover = delegate (bool hovered)

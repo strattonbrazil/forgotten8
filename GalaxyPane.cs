@@ -79,7 +79,8 @@ namespace forgotten.Desktop
                         closestSystemId = systemId;
                     }
                 }
-                System.systems[closestSystemId].Name = "Terragon";
+
+                System.systems[closestSystemId].SetHomeSystem();
 
                 int count = 0;
                 foreach (System s in System.systems)
