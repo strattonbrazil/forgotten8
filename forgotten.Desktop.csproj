@@ -42,21 +42,21 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
-    <Compile Include="ForgottenGame.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Pane.cs" />
-    <Compile Include="System.cs" />
-    <Compile Include="PaneStack.cs" />
-    <Compile Include="GalaxyPane.cs" />
-    <Compile Include="Asset.cs" />
-    <Compile Include="ScreenUtils.cs" />
-    <Compile Include="MouseTracker.cs" />
-    <Compile Include="SystemPane.cs" />
-    <Compile Include="TextAsset.cs" />
-    <Compile Include="Planet.cs" />
-    <Compile Include="GameRandom.cs" />
-    <Compile Include="PlanetPane.cs" />
+    <Compile Include="src/System.cs" />
+    <Compile Include="src/SystemPane.cs" />
+    <Compile Include="src\Asset.cs" />
+    <Compile Include="src\ForgottenGame.cs" />
+    <Compile Include="src\GalaxyPane.cs" />
+    <Compile Include="src\GameRandom.cs" />
+    <Compile Include="src\MouseTracker.cs" />
+    <Compile Include="src\Pane.cs" />
+    <Compile Include="src\PaneStack.cs" />
+    <Compile Include="src\Planet.cs" />
+    <Compile Include="src\PlanetPane.cs" />
+    <Compile Include="src\Program.cs" />
+    <Compile Include="src\ScreenUtils.cs" />
+    <Compile Include="src\TextAsset.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework">
