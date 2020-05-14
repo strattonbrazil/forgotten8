@@ -62,6 +62,7 @@ namespace forgotten.Desktop
             planets.RemoveRange(0, planets.Count);
             planets.Add(new Planet("Mercury"));
             planets.Add(new Planet("Terra"));
+
         }
 
         private void addPlanets(int numPlanets)

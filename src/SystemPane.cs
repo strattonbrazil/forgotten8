@@ -12,7 +12,7 @@ namespace forgotten.Desktop
         public SystemPane(System system)
         {
             this.system = system;
-            addChild("dialog", new Dialog(system));
+            addChild("dialog", new Dialog(this, system));
         }
 
         public override void Draw(ForgottenGame game, Vector2 targetSize)
@@ -37,7 +37,7 @@ namespace forgotten.Desktop
             private TextAsset difficultyLabel;
             private TextAsset planetInfoLabel;
 
-            public Dialog(System system)
+            public Dialog(Pane pane, System system)
             {
                 this.system = system;
 
@@ -50,7 +50,10 @@ namespace forgotten.Desktop
                 {
                     Func<bool> onClick = delegate ()
                     {
-                        PaneStack.Instance.push(new PlanetPane(planet));
+                        if (pane.isTopPane())
+                        {
+                            PaneStack.Instance.push(new PlanetPane(planet));
+                        }
                         return true;
                     };
                     Func<bool,bool> onHover = delegate (bool hovered)
