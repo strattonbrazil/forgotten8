@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import sys
 import math
 import json
@@ -141,6 +142,46 @@ class Window(QWidget):
                 print("saving changes")
                 with open(self.layeredFile, "w") as f:
                     json.dump(self.layeredData, f, indent=4)
+
+                for part in self.layeredData["parts"]:
+                    self.setupImageReader()
+                    dstSpriteImg = None
+                    dstBaseImg = None
+                    for i in range(self.imageReader.imageCount()):
+                        img = self.imageReader.read()
+                        subImg = img.copy(part["rect"]["x"],
+                                          part["rect"]["y"],
+                                          part["rect"]["width"],
+                                          part["rect"]["height"])
+
+                        if not dstSpriteImg:
+                            # make a really long image
+                            dstSpriteImg = subImg.copy(0, 0,
+                                                 part["rect"]["width"],
+                                                 part["rect"]["height"] * self.imageReader.imageCount())
+                            dstSpriteImg.save("/tmp/test_write.jpg")
+
+                            dstBaseImg = img
+                        
+                        p = QPainter()
+                        p.begin(dstSpriteImg)
+                        p.drawImage(0, part["rect"]["height"] * i, subImg)
+                        p.end()
+
+                        self.imageReader.jumpToNextImage()
+
+                    dstSpriteName = "part_%s_%i_%i.jpg" % (part["name"], part["rect"]["width"], part["rect"]["height"])
+                    dstDir = QDir(self.layeredDir.absoluteFilePath(self.layeredData["output_images"]))
+                    dstBasePath = dstDir.absoluteFilePath("base.jpg")
+                    dstSpritePath = dstDir.absoluteFilePath(dstSpriteName)
+
+                    if not dstDir.exists():
+                        print("creating directory: %s" % dstDir.absolutePath())
+                        os.makedirs(str(dstDir.absolutePath()))
+
+                    print("saving sprite: %s" % dstSpritePath)
+                    dstBaseImg.save(dstBasePath, None, quality=95)
+                    dstSpriteImg.save(dstSpritePath, None, quality=95)
             else:
                 print("changes ignored, closing")
             exit(0)
