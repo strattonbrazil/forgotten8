@@ -69,10 +69,29 @@ namespace forgotten.Desktop
                         return true;
                     };
 
-                    var sortButton = new Button(planet.Name, onClick, onHover);
-                    sortButton.Position = new Vector2(280 + (planetIndex*160), 280);
-                    addChild("sortButton", sortButton);
+                    var planetButton = new Button(planet.Name, onClick, onHover);
+                    planetButton.Position = new Vector2(280 + (planetIndex*160), 280);
+                    addChild("planetButton", planetButton);
                     planetIndex++;
+                }
+
+                if (system.Name == "Terragon")
+                {
+                    Func<bool> onClick = delegate ()
+                    {
+                        if (pane.isTopPane())
+                        {
+                            PaneStack.Instance.push(new SpacePortPane());
+                        }
+                        return true;
+                    };
+                    Func<bool, bool> onHover = delegate (bool hovered)
+                    {
+                        return true;
+                    };
+                    var spacePortButton = new Button("Space Port", onClick, onHover);
+                    spacePortButton.Position = new Vector2(280, 380);
+                    addChild("spacePortButton", spacePortButton);
                 }
             }
 

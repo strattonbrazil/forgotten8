@@ -124,7 +124,7 @@ namespace forgotten.Desktop
                 dstSystem = hoverSystem;
             }
 
-            float worldVelocity = 0.2f;
+            float worldVelocity = 2;
             if (dstSystem != null)
             {
                 Vector2 dstPos = dstSystem.Position;
@@ -140,8 +140,6 @@ namespace forgotten.Desktop
                     dstSystem = null;
                 }
             }
-
-            //throw new NotImplementedException();
         }
 
         public override void Draw(ForgottenGame game, Vector2 targetSize)
@@ -219,43 +217,6 @@ namespace forgotten.Desktop
             spriteBatch.Draw(playerTexture, screenPos);
 
             spriteBatch.End();
-
-            /*
-            for (int systemId = 0; systemId < systems.size(); systemId++)
-            {
-                SystemPtr s = systems[systemId];
-                // draw background
-                if (systemId == _systemHoverId)
-                {
-                    sf::Vector2f screenPos = su.worldToScreen(s->pos());
-                    //sf::Rect<float> bounds(screenPos.x - 5, screenPos.y - 5, 10, 10);
-                    sf::RectangleShape hitBox;
-                    hitBox.setPosition(screenPos.x - SYSTEM_HIT_R, screenPos.y - SYSTEM_HIT_R);
-                    hitBox.setSize(sf::Vector2f(SYSTEM_HIT_R * 2, SYSTEM_HIT_R * 2));
-                    hitBox.setFillColor(sf::Color(255, 255, 0));
-                    target.draw(hitBox);
-                }
-
-                int spriteRadius = s->size();
-                systemSprite.setPosition(su.worldToScreen(s->pos()) - sf::Vector2f(spriteRadius, spriteRadius));
-                resizeSprite(systemSprite, spriteRadius * 2, spriteRadius * 2);
-                systemSprite.setColor(s->color());
-                target.draw(systemSprite);
-
-                sf::Text text(s->name(), font, 14);
-            float nameWidth = text.getGlobalBounds().width;
-            sf::Vector2f textPosition = round(su.worldToScreen(s->pos()) + sf::Vector2f(-nameWidth * 0.5, 10));
-            text.setPosition(textPosition);
-            target.draw(text);
-        }
-
-        sf::CircleShape player(playerSizeP);
-        player.setFillColor(sf::Color(150, 50, 250));
-    player.setPosition(su.worldToScreen(_playerPos) - sf::Vector2f(playerSizeP, playerSizeP));
-    target.draw(player);
-
-*/
-
         }
     }
 }

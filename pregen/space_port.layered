@@ -1,0 +1,25 @@
+{
+    "output_cs": "../src/pregen/SpacePortLayered.cs", 
+    "parts": [
+        {
+            "name": "hand", 
+            "rect": {
+                "y": 191, 
+                "x": 265, 
+                "width": 50, 
+                "height": 34
+            }
+        }, 
+        {
+            "name": "face", 
+            "rect": {
+                "y": 27, 
+                "x": 148, 
+                "width": 175, 
+                "height": 173
+            }
+        }
+    ], 
+    "base_image": "space_port.gif", 
+    "output_images": "../Content/pregen/space_port"
+}
