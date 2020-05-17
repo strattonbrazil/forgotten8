@@ -12,9 +12,9 @@ namespace forgotten.Desktop
     public class ForgottenGame : Game
     {
         GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
-        Texture2D dummyTexture;
+        public SpriteBatch spriteBatch;
         bool escapeWasDown = false;
+        Texture2D dummyTexture;
 
         public ForgottenGame()
         {
@@ -27,14 +27,6 @@ namespace forgotten.Desktop
         public SpriteBatch CreateSpriteBatch()
         {
             return new SpriteBatch(GraphicsDevice);
-        }
-
-        public Texture2D CreateDummyTexture()
-        {
-            var dummyTexture = new Texture2D(GraphicsDevice, 1, 1);
-            Color[] dummyData = new Color[] { Color.White };
-            dummyTexture.SetData(dummyData);
-            return dummyTexture;
         }
 
         /// <summary>
@@ -64,7 +56,9 @@ namespace forgotten.Desktop
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            dummyTexture = CreateDummyTexture();
+            dummyTexture = new Texture2D(GraphicsDevice, 1, 1);
+            Color[] dummyData = new Color[] { Color.White };
+            dummyTexture.SetData(dummyData);
         }
 
         /// <summary>
@@ -129,9 +123,9 @@ namespace forgotten.Desktop
                                  targetSize,
                                  SpriteEffects.None,
                                  0);
-                spriteBatch.End();
-
+                                 
                 pane.DrawTree(this, targetSize);
+                spriteBatch.End();
             }
             base.Draw(gameTime);
         }

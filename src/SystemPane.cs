@@ -29,7 +29,6 @@ namespace forgotten.Desktop
         {
             private System system;
             private SpriteBatch spriteBatch;
-            private Texture2D dummyTexture;
             private Texture2D backgroundTexture;
             private const int DIALOG_WIDTH = 1200;
             private const int DIALOG_HEIGHT = 700;
@@ -97,25 +96,19 @@ namespace forgotten.Desktop
 
             public override void Draw(ForgottenGame game, Vector2 targetSize)
             {
-                if (spriteBatch == null)
+                var spriteBatch = game.spriteBatch;
+
+                if (backgroundTexture == null)
                 {
-                    spriteBatch = game.CreateSpriteBatch();
-                    dummyTexture = game.CreateDummyTexture();
                     backgroundTexture = game.Content.Load<Texture2D>("system_pane_background");
 
                 }
 
                 Vector2 borderOffset = new Vector2(2, 2);
-                spriteBatch.Begin();
-                spriteBatch.Draw(dummyTexture,
-                                 Position - borderOffset,
-                                 null, // source rect
-                                 Color.Black,
-                                 0,
-                                 Vector2.Zero,
-                                 new Vector2(DIALOG_WIDTH, DIALOG_HEIGHT) + borderOffset*2,
-                                 SpriteEffects.None,
-                                 0);
+                drawColoredRect(game,
+                                Position - borderOffset,
+                                new Vector2(DIALOG_WIDTH, DIALOG_HEIGHT) + borderOffset * 2,
+                                Color.Black);
 
                 spriteBatch.Draw(backgroundTexture,
                                  Position,
@@ -127,7 +120,6 @@ namespace forgotten.Desktop
                                  SpriteEffects.None,
                                  0);
                                  
-                spriteBatch.End();
             }
 
             public override void Update(Vector2 targetSize, GameTime gameTime)
@@ -161,34 +153,21 @@ namespace forgotten.Desktop
 
             public override void Draw(ForgottenGame game, Vector2 targetSize)
             {
-                if (spriteBatch == null)
+                var spriteBatch = game.spriteBatch;
+                if (normalFont == null)
                 {
-                    spriteBatch = game.CreateSpriteBatch();
-                    dummyTexture = game.CreateDummyTexture();
                     normalFont = game.Content.Load<SpriteFont>("Galaxy_normal");
                 }
 
                 var cornerPos = AbsolutePosition();
 
-                spriteBatch.Begin();
-
                 var fillColor = Color.CornflowerBlue;
                 if (isHovered)
                     fillColor = Color.Blue;
 
-                spriteBatch.Draw(dummyTexture,
-                                 cornerPos,
-                                 null, // source rect
-                                 fillColor,
-                                 0,
-                                 Vector2.Zero,
-                                 size,
-                                 SpriteEffects.None,
-                                 0);
+                drawColoredRect(game, cornerPos, size, fillColor);
 
                 spriteBatch.DrawString(normalFont, text, cornerPos + new Vector2(10, 0), Color.White);
-
-                spriteBatch.End();
             }
 
             public override void Update(Vector2 targetSize, GameTime gameTime)

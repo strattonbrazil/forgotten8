@@ -8,7 +8,6 @@ namespace forgotten.Desktop
     {
         public String Text;
         private SpriteFont normalFont;
-        private SpriteBatch spriteBatch;
 
         public TextAsset(String text = "")
         {
@@ -17,15 +16,13 @@ namespace forgotten.Desktop
 
         public override void Draw(ForgottenGame game, Vector2 targetSize)
         {
-            if (spriteBatch == null)
+            var spriteBatch = game.spriteBatch;
+            if (normalFont == null)
             {
-                spriteBatch = game.CreateSpriteBatch();
                 normalFont = game.Content.Load<SpriteFont>("Galaxy_normal");
             }
 
-            spriteBatch.Begin();
             spriteBatch.DrawString(normalFont, Text, AbsolutePosition(), Color.White);
-            spriteBatch.End();
         }
 
         public override void Update(Vector2 targetSize, GameTime gameTime)

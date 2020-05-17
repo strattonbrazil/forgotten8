@@ -9,29 +9,34 @@ namespace forgotten.Desktop
 {
     public class LayeredAsset : Asset
     {
-        private SpriteBatch spriteBatch;
         private String contentDir;
-        private List<Tuple<string,Texture2D>> partTextures = new List<Tuple<string, Texture2D>>();
+        private List<Tuple<string,LayeredPartInfo>> partTextures = new List<Tuple<string,LayeredPartInfo>>();
         private Texture2D baseTexture;
         private int numFrames;
         private int currFrame;
         private float animDelay;
         private float lastElapsed; // time passed since last frame update
+        private bool initialized = false;
+
+        private Dictionary<string, bool> outlinedParts = new Dictionary<string, bool>();
 
         public LayeredAsset(String contentDir)
         {
             this.contentDir = contentDir;
         }
 
+        public void setOutlinedPart(string partName, bool outlined = true)
+        {
+            outlinedParts.Add(partName, outlined);
+        }
+
         public override void Draw(ForgottenGame game, Vector2 targetSize)
         {
-            if (spriteBatch == null)
+            var spriteBatch = game.spriteBatch;
+            if (!initialized)
             {
-                spriteBatch = game.CreateSpriteBatch();
-                //Load directory info, abort if none
                 string baseDir = Directory.GetCurrentDirectory() + "/" + game.Content.RootDirectory + "/" + contentDir;
-                //string baseDir = game.Content.RootDirectory + "\\" + contentDir;
-DirectoryInfo dir = new DirectoryInfo(baseDir);
+                DirectoryInfo dir = new DirectoryInfo(baseDir);
                 if (!dir.Exists)
                     throw new DirectoryNotFoundException();
 
@@ -55,14 +60,18 @@ DirectoryInfo dir = new DirectoryInfo(baseDir);
                         }
                     }
                     else
-                        partTextures.Add(new Tuple<string, Texture2D>(key, texture));
+                    {
+                        LayeredPartInfo partInfo = new LayeredPartInfo(key, texture);
+                        partTextures.Add(new Tuple<string, LayeredPartInfo>(partInfo.name, partInfo));
+                    }
                     Texture2D tex = game.Content.Load<Texture2D>(baseDir + "/" + key);
                 }
+
+                initialized = true;
             }
 
             Vector2 origin = AbsolutePosition();
 
-            spriteBatch.Begin();
             spriteBatch.Draw(baseTexture,
                          origin,
                          null, // source rect
@@ -73,19 +82,18 @@ DirectoryInfo dir = new DirectoryInfo(baseDir);
                          SpriteEffects.None,
                          0);
 
-            foreach (Tuple<string,Texture2D> part in partTextures)
+            foreach (Tuple<string, LayeredPartInfo> part in partTextures)
             {
                 string partName = part.Item1;
-                Match m = Regex.Match(partName, @"_([0-9]+)_([0-9]+)$");
-                int dstX = Int32.Parse(m.Groups[1].ToString());
-                int dstY = Int32.Parse(m.Groups[2].ToString());
+                LayeredPartInfo partInfo = part.Item2;
+                Texture2D partTexture = partInfo.texture;
 
-                Texture2D partTexture = part.Item2;
                 int partSubheight = partTexture.Height / numFrames;
                 int subY = (partSubheight * currFrame) % partTexture.Height;
                 Rectangle srcRect = new Rectangle(0, subY, partTexture.Width, partSubheight);
+                Vector2 partPos = origin + new Vector2(partInfo.dstX, partInfo.dstY);
                 spriteBatch.Draw(partTexture,
-                                 origin + new Vector2(dstX, dstY),
+                                 partPos,
                                  srcRect, // source rect
                                  Color.White,
                                  0,
@@ -95,7 +103,19 @@ DirectoryInfo dir = new DirectoryInfo(baseDir);
                                  0);
             }
 
-            spriteBatch.End();
+            foreach (Tuple<string, LayeredPartInfo> part in partTextures)
+            {
+                string partName = part.Item1;
+                LayeredPartInfo partInfo = part.Item2;
+                Texture2D partTexture = partInfo.texture;
+                Vector2 partPos = origin + new Vector2(partInfo.dstX, partInfo.dstY);
+                int partSubheight = partTexture.Height / numFrames;
+
+                if (outlinedParts.ContainsKey(partName) && outlinedParts[partName])
+                {
+                    drawColoredOutline(game, partPos, new Vector2(partTexture.Width, partSubheight), new Color(Color.Black, 20), 32);
+                }
+            }
         }
 
         public override void Update(Vector2 targetSize, GameTime gameTime)
@@ -109,6 +129,23 @@ DirectoryInfo dir = new DirectoryInfo(baseDir);
             }
 
             //throw new NotImplementedException();
+        }
+
+        class LayeredPartInfo
+        {
+            public readonly string name;
+            public readonly int dstX;
+            public readonly int dstY;
+            public readonly Texture2D texture;
+
+            public LayeredPartInfo(string partKey, Texture2D texture)
+            {
+                Match m = Regex.Match(partKey, @"^part_([a-zA-Z0-9_]+)_([0-9]+)_([0-9]+)$");
+                name = m.Groups[1].ToString();
+                dstX = Int32.Parse(m.Groups[2].ToString());
+                dstY = Int32.Parse(m.Groups[3].ToString());
+                this.texture = texture;
+            }
         }
     }
 }

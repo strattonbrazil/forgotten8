@@ -10,7 +10,6 @@ namespace forgotten.Desktop
         private SpriteBatch spriteBatch;
         private Texture2D systemTexture;
         private Texture2D playerTexture;
-        private Texture2D dummyTexture;
         private SpriteFont normalFont;
 
         private System hoverSystem;
@@ -144,9 +143,10 @@ namespace forgotten.Desktop
 
         public override void Draw(ForgottenGame game, Vector2 targetSize)
         {
-            if (spriteBatch == null)
+            var spriteBatch = game.spriteBatch;
+
+            if (systemTexture == null)
             {
-                spriteBatch = game.CreateSpriteBatch();
                 systemTexture = game.Content.Load<Texture2D>("system");
 
                 const int PLAYER_WIDTH = 8;
@@ -158,32 +158,21 @@ namespace forgotten.Desktop
                     data[i] = Color.CornflowerBlue;
                 }
                 playerTexture.SetData(data);
-
-                dummyTexture = game.CreateDummyTexture(); 
-
+                
                 normalFont = game.Content.Load<SpriteFont>("Galaxy_normal");
             }
 
             Vector2 worldSize = new Vector2(WORLD_WIDTH, WORLD_HEIGHT);
             ScreenUtils su = new ScreenUtils(targetSize, worldSize, 40);
-
-            spriteBatch.Begin();
-
+            
             // draw hover system
             if (hoverSystem != null)
             {
                 Vector2 hoverPos = su.WorldToScreen(hoverSystem.Position) - new Vector2(SYSTEM_HIT_R, SYSTEM_HIT_R);
 
                 Vector2 texToScreen = new Vector2(SYSTEM_HIT_R*2, SYSTEM_HIT_R*2);
-                spriteBatch.Draw(dummyTexture,
-                                 hoverPos,
-                                 null, // source rect
-                                 Color.YellowGreen,
-                                 0,
-                                 Vector2.Zero,
-                                 texToScreen,
-                                 SpriteEffects.None,
-                                 0);
+
+                drawColoredRect(game, hoverPos, texToScreen, Color.YellowGreen);
             }
 
             foreach (System system in System.systems)
@@ -215,8 +204,6 @@ namespace forgotten.Desktop
             //
             Vector2 screenPos = su.WorldToScreen(playerPos);
             spriteBatch.Draw(playerTexture, screenPos);
-
-            spriteBatch.End();
         }
     }
 }
