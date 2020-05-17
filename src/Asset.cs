@@ -13,6 +13,7 @@ namespace forgotten.Desktop
 
         public Vector2 Position { get; set; } = new Vector2();
         private Texture2D dummyTexture;
+        private SpriteFont _normalFont; 
 
         public Vector2 AbsolutePosition()
         {
@@ -52,6 +53,13 @@ namespace forgotten.Desktop
             foreach (KeyValuePair<String,Asset> kvp in children) {
                 kvp.Value.DrawTree(game, targetSize);
             }
+        }
+
+        protected SpriteFont normalFont(ForgottenGame game)
+        {
+            if (_normalFont == null)
+                _normalFont = game.Content.Load<SpriteFont>("Galaxy_normal");
+            return _normalFont;
         }
 
         protected void drawColoredRect(ForgottenGame game, Vector2 pos, Vector2 size, Color color)

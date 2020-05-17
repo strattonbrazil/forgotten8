@@ -28,7 +28,6 @@ namespace forgotten.Desktop
         private class Dialog : Asset
         {
             private System system;
-            private SpriteBatch spriteBatch;
             private Texture2D backgroundTexture;
             private const int DIALOG_WIDTH = 1200;
             private const int DIALOG_HEIGHT = 700;
@@ -136,7 +135,6 @@ namespace forgotten.Desktop
         {
             private SpriteBatch spriteBatch;
             private Texture2D dummyTexture;
-            private SpriteFont normalFont;
             private String text;
             private Vector2 size;
             private MouseTracker mouseTracker = new MouseTracker();
@@ -154,10 +152,6 @@ namespace forgotten.Desktop
             public override void Draw(ForgottenGame game, Vector2 targetSize)
             {
                 var spriteBatch = game.spriteBatch;
-                if (normalFont == null)
-                {
-                    normalFont = game.Content.Load<SpriteFont>("Galaxy_normal");
-                }
 
                 var cornerPos = AbsolutePosition();
 
@@ -167,7 +161,7 @@ namespace forgotten.Desktop
 
                 drawColoredRect(game, cornerPos, size, fillColor);
 
-                spriteBatch.DrawString(normalFont, text, cornerPos + new Vector2(10, 0), Color.White);
+                spriteBatch.DrawString(normalFont(game), text, cornerPos + new Vector2(10, 0), Color.White);
             }
 
             public override void Update(Vector2 targetSize, GameTime gameTime)

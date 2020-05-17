@@ -7,10 +7,8 @@ namespace forgotten.Desktop
 {
     public class GalaxyPane : Pane
     {
-        private SpriteBatch spriteBatch;
         private Texture2D systemTexture;
         private Texture2D playerTexture;
-        private SpriteFont normalFont;
 
         private System hoverSystem;
         private System dstSystem;
@@ -143,7 +141,7 @@ namespace forgotten.Desktop
 
         public override void Draw(ForgottenGame game, Vector2 targetSize)
         {
-            var spriteBatch = game.spriteBatch;
+            SpriteBatch spriteBatch = game.spriteBatch;
 
             if (systemTexture == null)
             {
@@ -158,8 +156,6 @@ namespace forgotten.Desktop
                     data[i] = Color.CornflowerBlue;
                 }
                 playerTexture.SetData(data);
-                
-                normalFont = game.Content.Load<SpriteFont>("Galaxy_normal");
             }
 
             Vector2 worldSize = new Vector2(WORLD_WIDTH, WORLD_HEIGHT);
@@ -194,10 +190,10 @@ namespace forgotten.Desktop
                                  SpriteEffects.None,
                                  0);
 
-                float nameWidth = normalFont.MeasureString(system.Name).X;
+                float nameWidth = normalFont(game).MeasureString(system.Name).X;
                 Vector2 namePos = su.WorldToScreen(system.Position) + new Vector2(-nameWidth * 0.5f, 10);
                 namePos = new Vector2((int)namePos.X, (int)namePos.Y);
-                spriteBatch.DrawString(normalFont, system.Name, namePos, Color.White);
+                spriteBatch.DrawString(normalFont(game), system.Name, namePos, Color.White);
             }
 
             // draw player

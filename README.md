@@ -1,2 +1,2 @@
 ﻿=== TODO
-* add planets to systems
+* make Game global reference

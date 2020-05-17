@@ -4,6 +4,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace forgotten.Desktop
 {
@@ -18,16 +19,18 @@ namespace forgotten.Desktop
         private float lastElapsed; // time passed since last frame update
         private bool initialized = false;
 
-        private Dictionary<string, bool> outlinedParts = new Dictionary<string, bool>();
+        private Dictionary<string, string> outlinedParts = new Dictionary<string, string>();
+
+        MouseTracker mouseTracker = new MouseTracker();
 
         public LayeredAsset(String contentDir)
         {
             this.contentDir = contentDir;
         }
 
-        public void setOutlinedPart(string partName, bool outlined = true)
+        public void setOutlinedPart(string partName, string visibleName)
         {
-            outlinedParts.Add(partName, outlined);
+            outlinedParts.Add(partName, visibleName);
         }
 
         public override void Draw(ForgottenGame game, Vector2 targetSize)
@@ -61,7 +64,10 @@ namespace forgotten.Desktop
                     }
                     else
                     {
-                        LayeredPartInfo partInfo = new LayeredPartInfo(key, texture);
+                        int subwidth = texture.Width;
+                        int subheight = texture.Height / numFrames;
+                        LayeredPartInfo partInfo = new LayeredPartInfo(key, texture, subwidth, subheight);
+
                         partTextures.Add(new Tuple<string, LayeredPartInfo>(partInfo.name, partInfo));
                     }
                     Texture2D tex = game.Content.Load<Texture2D>(baseDir + "/" + key);
@@ -88,9 +94,8 @@ namespace forgotten.Desktop
                 LayeredPartInfo partInfo = part.Item2;
                 Texture2D partTexture = partInfo.texture;
 
-                int partSubheight = partTexture.Height / numFrames;
-                int subY = (partSubheight * currFrame) % partTexture.Height;
-                Rectangle srcRect = new Rectangle(0, subY, partTexture.Width, partSubheight);
+                int subY = (partInfo.subheight * currFrame) % partTexture.Height;
+                Rectangle srcRect = new Rectangle(0, subY, partInfo.subwidth, partInfo.subheight);
                 Vector2 partPos = origin + new Vector2(partInfo.dstX, partInfo.dstY);
                 spriteBatch.Draw(partTexture,
                                  partPos,
@@ -109,17 +114,38 @@ namespace forgotten.Desktop
                 LayeredPartInfo partInfo = part.Item2;
                 Texture2D partTexture = partInfo.texture;
                 Vector2 partPos = origin + new Vector2(partInfo.dstX, partInfo.dstY);
-                int partSubheight = partTexture.Height / numFrames;
 
-                if (outlinedParts.ContainsKey(partName) && outlinedParts[partName])
+                if (outlinedParts.ContainsKey(partName))
                 {
-                    drawColoredOutline(game, partPos, new Vector2(partTexture.Width, partSubheight), new Color(Color.Black, 20), 32);
+                    string partLabel = outlinedParts[partName];
+                    int border = 4;
+                    if (partInfo.mouseHovering)
+                    {
+                        drawColoredOutline(game, partPos, new Vector2(partInfo.subwidth, partInfo.subheight), new Color(Color.White, 20), border);
+
+                    }
+                    else
+                    {
+                        drawColoredOutline(game, partPos, new Vector2(partInfo.subwidth, partInfo.subheight), new Color(Color.Black, 20), border);
+                    }
+                    spriteBatch.DrawString(normalFont(game), partLabel, partPos - new Vector2(0, normalFont(game).LineSpacing), Color.White);
                 }
             }
         }
 
         public override void Update(Vector2 targetSize, GameTime gameTime)
         {
+            MouseState ms = Mouse.GetState();
+            mouseTracker.Update(ms);
+
+            Vector2 origin = AbsolutePosition();
+            foreach (Tuple<string, LayeredPartInfo> part in partTextures)
+            {
+                LayeredPartInfo partInfo = part.Item2;
+                Rectangle screenRect = new Rectangle((int)(origin.X + partInfo.dstX), (int)(origin.Y + partInfo.dstY), partInfo.subwidth, partInfo.subheight);
+                partInfo.mouseHovering = screenRect.Contains(ms.Position);
+            }
+
             float elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
             lastElapsed += elapsed;
             while (lastElapsed > animDelay)
@@ -127,8 +153,6 @@ namespace forgotten.Desktop
                 lastElapsed -= animDelay;
                 currFrame += 1;
             }
-
-            //throw new NotImplementedException();
         }
 
         class LayeredPartInfo
@@ -136,15 +160,20 @@ namespace forgotten.Desktop
             public readonly string name;
             public readonly int dstX;
             public readonly int dstY;
+            public readonly int subwidth;
+            public readonly int subheight;
             public readonly Texture2D texture;
+            public bool mouseHovering = false;
 
-            public LayeredPartInfo(string partKey, Texture2D texture)
+            public LayeredPartInfo(string partKey, Texture2D texture, int subwidth, int subheight)
             {
                 Match m = Regex.Match(partKey, @"^part_([a-zA-Z0-9_]+)_([0-9]+)_([0-9]+)$");
                 name = m.Groups[1].ToString();
                 dstX = Int32.Parse(m.Groups[2].ToString());
                 dstY = Int32.Parse(m.Groups[3].ToString());
                 this.texture = texture;
+                this.subwidth = subwidth;
+                this.subheight = subheight;
             }
         }
     }
