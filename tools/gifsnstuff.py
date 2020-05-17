@@ -170,9 +170,9 @@ class Window(QWidget):
 
                         self.imageReader.jumpToNextImage()
 
-                    dstSpriteName = "part_%s_%i_%i.jpg" % (part["name"], part["rect"]["width"], part["rect"]["height"])
+                    dstSpriteName = "part_%s_%i_%i.jpg" % (part["name"], part["rect"]["x"], part["rect"]["y"])
                     dstDir = QDir(self.layeredDir.absoluteFilePath(self.layeredData["output_images"]))
-                    dstBasePath = dstDir.absoluteFilePath("base.jpg")
+                    dstBasePath = dstDir.absoluteFilePath("base_count%i_delay%i.jpg" % (self.imageReader.imageCount(), self.imageReader.nextImageDelay()))
                     dstSpritePath = dstDir.absoluteFilePath(dstSpriteName)
 
                     if not dstDir.exists():
