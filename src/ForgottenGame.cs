@@ -11,13 +11,18 @@ namespace forgotten.Desktop
     /// </summary>
     public class ForgottenGame : Game
     {
-        GraphicsDeviceManager graphics;
+        public GraphicsDeviceManager graphics;
         public SpriteBatch spriteBatch;
-        bool escapeWasDown = false;
-        Texture2D dummyTexture;
+        private bool escapeWasDown = false;
+        private Texture2D dummyTexture;
+
+        public static ForgottenGame GlobalRef;
 
         public ForgottenGame()
         {
+            // store for quick access
+            GlobalRef = this;
+
             graphics = new GraphicsDeviceManager(this);
             graphics.PreferredBackBufferWidth = 1254;
             graphics.PreferredBackBufferHeight = 716;
@@ -28,6 +33,16 @@ namespace forgotten.Desktop
         {
             return new SpriteBatch(GraphicsDevice);
         }
+
+        /*
+        public Texture2D CreateDummyTexture()
+        {
+            var dummyTexture = new Texture2D(GraphicsDevice, 1, 1);
+            Color[] dummyData = new Color[] { Color.White };
+            dummyTexture.SetData(dummyData);
+            return dummyTexture;
+        }
+        */
 
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.
@@ -44,7 +59,7 @@ namespace forgotten.Desktop
             this.IsMouseVisible = true;
             this.Window.AllowUserResizing = true;
 
-            PaneStack.Instance.push(new GalaxyPane());
+            PaneStack.Instance.Push(new GalaxyPane());
         }
 
         /// <summary>
@@ -124,7 +139,7 @@ namespace forgotten.Desktop
                                  SpriteEffects.None,
                                  0);
                                  
-                pane.DrawTree(this, targetSize);
+                pane.DrawTree(targetSize);
                 spriteBatch.End();
             }
             base.Draw(gameTime);

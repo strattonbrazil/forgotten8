@@ -12,7 +12,7 @@ namespace forgotten.Desktop
         {
         }
 
-        public void push(Pane pane)
+        public void Push(Pane pane)
         {
             panes.Add(pane);
         }

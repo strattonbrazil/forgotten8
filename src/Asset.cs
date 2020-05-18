@@ -27,7 +27,7 @@ namespace forgotten.Desktop
             return pos;
         }
 
-        public Asset addChild(String name, Asset asset)
+        public Asset AddChild(String name, Asset asset)
         {
             asset.Parent = this;
             children.Add(new KeyValuePair<string, Asset>(name, asset));
@@ -45,60 +45,70 @@ namespace forgotten.Desktop
             }
         }
 
-        public abstract void Draw(ForgottenGame game, Vector2 targetSize);
+        public abstract void Draw(Vector2 targetSize);
 
-        public void DrawTree(ForgottenGame game, Vector2 targetSize)
+        public void DrawTree(Vector2 targetSize)
         {
-            Draw(game, targetSize);
+            Draw(targetSize);
             foreach (KeyValuePair<String,Asset> kvp in children) {
-                kvp.Value.DrawTree(game, targetSize);
+                kvp.Value.DrawTree(targetSize);
             }
         }
 
-        protected SpriteFont normalFont(ForgottenGame game)
+        protected ForgottenGame Game()
+        {
+            return ForgottenGame.GlobalRef;
+        }
+
+        protected SpriteBatch GameSpriteBatch()
+        {
+            return Game().spriteBatch;
+        }
+
+        protected SpriteFont NormalFont()
         {
             if (_normalFont == null)
-                _normalFont = game.Content.Load<SpriteFont>("Galaxy_normal");
+                _normalFont = Game().Content.Load<SpriteFont>("Galaxy_normal");
             return _normalFont;
         }
 
-        protected void drawColoredRect(ForgottenGame game, Vector2 pos, Vector2 size, Color color)
+        protected void DrawColoredRect(Vector2 pos, Vector2 size, Color color)
         {
             if (dummyTexture == null)
             {
-                createDummyTexture(game);
+                CreateDummyTexture();
             }
 
-            game.spriteBatch.Draw(dummyTexture,
-                                  pos,
-                                  null, // source rect
-                                  color,
-                                  0,
-                                  Vector2.Zero,
-                                  size,
-                                  SpriteEffects.None,
-                                  0);
+            GameSpriteBatch().Draw(dummyTexture,
+                                   pos,
+                                   null, // source rect
+                                   color,
+                                   0,
+                                   Vector2.Zero,
+                                   size,
+                                   SpriteEffects.None,
+                                   0);
 
         }
 
-        protected void drawColoredOutline(ForgottenGame game, Vector2 pos, Vector2 size, Color color, int border)
+        protected void DrawColoredOutline(Vector2 pos, Vector2 size, Color color, int border)
         {
             // left side
-            drawColoredRect(game, pos, new Vector2(border, size.Y), color);
+            DrawColoredRect(pos, new Vector2(border, size.Y), color);
 
             // bottom side
-            drawColoredRect(game, pos + new Vector2(border, size.Y - border), new Vector2(size.X - border*2, border), color);
+            DrawColoredRect(pos + new Vector2(border, size.Y - border), new Vector2(size.X - border*2, border), color);
 
             // right side
-            drawColoredRect(game, pos + new Vector2(size.X - border, 0), new Vector2(border, size.Y), color);
+            DrawColoredRect(pos + new Vector2(size.X - border, 0), new Vector2(border, size.Y), color);
 
             // top side
-            drawColoredRect(game, pos + new Vector2(border, 0), new Vector2(size.X - border*2, border), color);
+            DrawColoredRect(pos + new Vector2(border, 0), new Vector2(size.X - border*2, border), color);
         }
 
-        private void createDummyTexture(Game game)
+        private void CreateDummyTexture()
         {
-            dummyTexture = new Texture2D(game.GraphicsDevice, 1, 1);
+            dummyTexture = new Texture2D(Game().GraphicsDevice, 1, 1);
             Color[] dummyData = new Color[] { Color.White };
             dummyTexture.SetData(dummyData);
         }

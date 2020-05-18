@@ -11,9 +11,9 @@ namespace forgotten.Desktop
         public Color Color { get; set; }
         public float Difficulty;
 
-        public List<Planet> planets = new List<Planet>();
+        public List<Planet> Planets = new List<Planet>();
 
-        public static List<System> systems = new List<System>();
+        public static List<System> Systems = new List<System>();
 
         public System(Vector2 position)
         {
@@ -39,19 +39,19 @@ namespace forgotten.Desktop
             float planetRnd = (float)rnd.NextDouble();
             if (planetRnd < 0.1)
             {
-                addPlanets(2);
+                AddPlanets(2);
             } 
             else if (planetRnd < 0.3)
             {
-                addPlanets(3);
+                AddPlanets(3);
             } 
             else if (planetRnd < 0.6)
             {
-                addPlanets(4);
+                AddPlanets(4);
             }
             else if (planetRnd < 0.8)
             {
-                addPlanets(5 + (int)(3*rnd.NextDouble()));
+                AddPlanets(5 + (int)(3*rnd.NextDouble()));
             }
         }
 
@@ -59,23 +59,23 @@ namespace forgotten.Desktop
         public void SetHomeSystem()
         {
             Name = "Terragon";
-            planets.RemoveRange(0, planets.Count);
-            planets.Add(new Planet("Mercury"));
-            planets.Add(new Planet("Terra"));
+            Planets.RemoveRange(0, Planets.Count);
+            Planets.Add(new Planet("Mercury"));
+            Planets.Add(new Planet("Terra"));
 
         }
 
-        private void addPlanets(int numPlanets)
+        private void AddPlanets(int numPlanets)
         {
             for (int i = 0; i < numPlanets; i++)
             {
-                String name = generatePlanetName();
+                String name = GeneratePlanetName();
                 Planet planet = new Planet(name);
-                planets.Add(planet);
+                Planets.Add(planet);
             }
         }
 
-        private String generatePlanetName()
+        private String GeneratePlanetName()
         {
             var rnd = GameRandom.Instance;
 
@@ -104,7 +104,7 @@ namespace forgotten.Desktop
             };
 
             String name = rnd.Choose(prefixes);
-            if (rnd.nextFloat() < 0.2)
+            if (rnd.NextFloat() < 0.2)
             {
                 name += rnd.Choose(mids);
             }
@@ -112,6 +112,5 @@ namespace forgotten.Desktop
 
             return name;
         }
-
     }
 }

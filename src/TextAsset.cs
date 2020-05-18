@@ -13,10 +13,9 @@ namespace forgotten.Desktop
             this.Text = text;
         }
 
-        public override void Draw(ForgottenGame game, Vector2 targetSize)
+        public override void Draw(Vector2 targetSize)
         {
-            var spriteBatch = game.spriteBatch;
-            spriteBatch.DrawString(normalFont(game), Text, AbsolutePosition(), Color.White);
+            GameSpriteBatch().DrawString(NormalFont(), Text, AbsolutePosition(), Color.White);
         }
 
         public override void Update(Vector2 targetSize, GameTime gameTime)

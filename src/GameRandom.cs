@@ -16,7 +16,7 @@ namespace forgotten.Desktop
             return array[rnd.Next(array.Length)];
         }
 
-        public float nextFloat()
+        public float NextFloat()
         {
             return (float)rnd.NextDouble();
         }

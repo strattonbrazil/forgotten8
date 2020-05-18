@@ -10,14 +10,12 @@ namespace forgotten.Desktop
 {
     public class LayeredAsset : Asset
     {
-        private String contentDir;
         private List<Tuple<string,LayeredPartInfo>> partTextures = new List<Tuple<string,LayeredPartInfo>>();
         private Texture2D baseTexture;
         private int numFrames;
         private int currFrame;
         private float animDelay;
         private float lastElapsed; // time passed since last frame update
-        private bool initialized = false;
         public Vector2 Size = new Vector2(0,0); 
 
         private Dictionary<string, string> outlinedParts = new Dictionary<string, string>();
@@ -26,78 +24,71 @@ namespace forgotten.Desktop
 
         public LayeredAsset(String contentDir)
         {
-            this.contentDir = contentDir;
+            string baseDir = Directory.GetCurrentDirectory() + "/" + Game().Content.RootDirectory + "/" + contentDir;
+            DirectoryInfo dir = new DirectoryInfo(baseDir);
+            if (!dir.Exists)
+                throw new DirectoryNotFoundException();
+
+            FileInfo[] files = dir.GetFiles("*.*");
+            // make sure "base_" is first since it has metadata
+            for (int i = 0; i < files.Length; i++)
+            {
+                if (files[i].Name.StartsWith("base_"))
+                {
+                    FileInfo tmp = files[0];
+                    files[0] = files[i];
+                    files[i] = tmp;
+                }
+            }
+
+            foreach (FileInfo file in files)
+            {
+                string key = Path.GetFileNameWithoutExtension(file.Name);
+                Texture2D texture = Game().Content.Load<Texture2D>(baseDir + "/" + key);
+                if (key.StartsWith("base_"))
+                {
+                    baseTexture = texture;
+                    Match m = Regex.Match(key, @"_count([0-9]+)_delay([0-9]+)");
+                    if (m.Success)
+                    {
+                        numFrames = Int32.Parse(m.Groups[1].ToString());
+                        animDelay = Int32.Parse(m.Groups[2].ToString()) / 1000.0f;
+                    }
+                    else
+                    {
+                        Console.WriteLine("unable to find count and delay: " + key);
+                    }
+                }
+                else
+                {
+                    int subwidth = texture.Width;
+                    int subheight = texture.Height / numFrames;
+                    LayeredPartInfo partInfo = new LayeredPartInfo(key, texture, subwidth, subheight);
+
+                    partTextures.Add(new Tuple<string, LayeredPartInfo>(partInfo.name, partInfo));
+                }
+                Texture2D tex = Game().Content.Load<Texture2D>(baseDir + "/" + key);
+            }
         }
 
-        public void setOutlinedPart(string partName, string visibleName)
+        public void SetOutlinedPart(string partName, string visibleName)
         {
             outlinedParts.Add(partName, visibleName);
         }
 
-        public override void Draw(ForgottenGame game, Vector2 targetSize)
+        public override void Draw(Vector2 targetSize)
         {
-            var spriteBatch = game.spriteBatch;
-            if (!initialized)
-            {
-                string baseDir = Directory.GetCurrentDirectory() + "/" + game.Content.RootDirectory + "/" + contentDir;
-                DirectoryInfo dir = new DirectoryInfo(baseDir);
-                if (!dir.Exists)
-                    throw new DirectoryNotFoundException();
-
-                FileInfo[] files = dir.GetFiles("*.*");
-                // make sure "base_" is first since it has metadata
-                for (int i = 0; i < files.Length; i++)
-                {
-                    if (files[i].Name.StartsWith("base_")) {
-                        FileInfo tmp = files[0];
-                        files[0] = files[i];
-                        files[i] = tmp;
-                    }
-                }
-
-                foreach (FileInfo file in files)
-                {
-                    string key = Path.GetFileNameWithoutExtension(file.Name);
-                    Texture2D texture = game.Content.Load<Texture2D>(baseDir + "/" + key);
-                    if (key.StartsWith("base_"))
-                    {
-                        baseTexture = texture;
-                        Match m = Regex.Match(key, @"_count([0-9]+)_delay([0-9]+)");
-                        if (m.Success)
-                        {
-                            numFrames = Int32.Parse(m.Groups[1].ToString());
-                            animDelay = Int32.Parse(m.Groups[2].ToString()) / 1000.0f;
-                        }
-                        else
-                        {
-                            Console.WriteLine("unable to find count and delay: " + key);
-                        }
-                    }
-                    else
-                    {
-                        int subwidth = texture.Width;
-                        int subheight = texture.Height / numFrames;
-                        LayeredPartInfo partInfo = new LayeredPartInfo(key, texture, subwidth, subheight);
-
-                        partTextures.Add(new Tuple<string, LayeredPartInfo>(partInfo.name, partInfo));
-                    }
-                    Texture2D tex = game.Content.Load<Texture2D>(baseDir + "/" + key);
-                }
-
-                initialized = true;
-            }
-
             Vector2 origin = AbsolutePosition();
 
-            spriteBatch.Draw(baseTexture,
-                         origin,
-                         null, // source rect
-                         Color.White,
-                         0,
-                         Vector2.Zero,
-                         Vector2.One,
-                         SpriteEffects.None,
-                         0);
+            GameSpriteBatch().Draw(baseTexture,
+                                   origin,
+                                   null, // source rect
+                                   Color.White,
+                                   0,
+                                   Vector2.Zero,
+                                   Vector2.One,
+                                   SpriteEffects.None,
+                                   0);
 
             foreach (Tuple<string, LayeredPartInfo> part in partTextures)
             {
@@ -108,15 +99,15 @@ namespace forgotten.Desktop
                 int subY = (partInfo.subheight * currFrame) % partTexture.Height;
                 Rectangle srcRect = new Rectangle(0, subY, partInfo.subwidth, partInfo.subheight);
                 Vector2 partPos = origin + new Vector2(partInfo.dstX, partInfo.dstY);
-                spriteBatch.Draw(partTexture,
-                                 partPos,
-                                 srcRect, // source rect
-                                 Color.White,
-                                 0,
-                                 Vector2.Zero,
-                                 Vector2.One,
-                                 SpriteEffects.None,
-                                 0);
+                GameSpriteBatch().Draw(partTexture,
+                                       partPos,
+                                       srcRect, // source rect
+                                       Color.White,
+                                       0,
+                                       Vector2.Zero,
+                                       Vector2.One,
+                                       SpriteEffects.None,
+                                       0);
             }
 
             foreach (Tuple<string, LayeredPartInfo> part in partTextures)
@@ -132,14 +123,14 @@ namespace forgotten.Desktop
                     int border = 4;
                     if (partInfo.mouseHovering)
                     {
-                        drawColoredOutline(game, partPos, new Vector2(partInfo.subwidth, partInfo.subheight), new Color(Color.White, 20), border);
+                        DrawColoredOutline(partPos, new Vector2(partInfo.subwidth, partInfo.subheight), new Color(Color.White, 20), border);
 
                     }
                     else
                     {
-                        drawColoredOutline(game, partPos, new Vector2(partInfo.subwidth, partInfo.subheight), new Color(Color.Black, 20), border);
+                        DrawColoredOutline(partPos, new Vector2(partInfo.subwidth, partInfo.subheight), new Color(Color.Black, 20), border);
                     }
-                    spriteBatch.DrawString(normalFont(game), partLabel, partPos - new Vector2(0, normalFont(game).LineSpacing), Color.White);
+                    GameSpriteBatch().DrawString(NormalFont(), partLabel, partPos - new Vector2(0, NormalFont().LineSpacing), Color.White);
                 }
             }
         }

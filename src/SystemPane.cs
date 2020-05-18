@@ -12,17 +12,15 @@ namespace forgotten.Desktop
         public SystemPane(System system)
         {
             this.system = system;
-            addChild("dialog", new Dialog(this, system));
+            AddChild("dialog", new Dialog(this, system));
         }
 
-        public override void Draw(ForgottenGame game, Vector2 targetSize)
+        public override void Draw(Vector2 targetSize)
         {
-            //throw new NotImplementedException();
         }
 
         public override void Update(Vector2 targetSize, GameTime gameTime)
         {
-            //throw new NotImplementedException();
         }
 
         private class Dialog : Asset
@@ -39,18 +37,18 @@ namespace forgotten.Desktop
             {
                 this.system = system;
 
-                systemLabel = (TextAsset)addChild("systemLabel", new TextAsset(system.Name));
-                difficultyLabel = (TextAsset)addChild("difficultyLabel", new TextAsset(system.Difficulty.ToString()));
-                planetInfoLabel = (TextAsset)addChild("difficultyLabel", new TextAsset());
+                systemLabel = (TextAsset)AddChild("systemLabel", new TextAsset(system.Name));
+                difficultyLabel = (TextAsset)AddChild("difficultyLabel", new TextAsset(system.Difficulty.ToString()));
+                planetInfoLabel = (TextAsset)AddChild("difficultyLabel", new TextAsset());
 
                 int planetIndex = 0;
-                foreach (Planet planet in system.planets)
+                foreach (Planet planet in system.Planets)
                 {
                     Func<bool> onClick = delegate ()
                     {
-                        if (pane.isTopPane())
+                        if (pane.IsTopPane())
                         {
-                            PaneStack.Instance.push(new PlanetPane(planet));
+                            PaneStack.Instance.Push(new PlanetPane(planet));
                         }
                         return true;
                     };
@@ -69,7 +67,7 @@ namespace forgotten.Desktop
 
                     var planetButton = new Button(planet.Name, onClick, onHover);
                     planetButton.Position = new Vector2(280 + (planetIndex*160), 280);
-                    addChild("planetButton", planetButton);
+                    AddChild("planetButton", planetButton);
                     planetIndex++;
                 }
 
@@ -77,9 +75,9 @@ namespace forgotten.Desktop
                 {
                     Func<bool> onClick = delegate ()
                     {
-                        if (pane.isTopPane())
+                        if (pane.IsTopPane())
                         {
-                            PaneStack.Instance.push(new SpacePortPane());
+                            PaneStack.Instance.Push(new SpacePortPane());
                         }
                         return true;
                     };
@@ -89,35 +87,31 @@ namespace forgotten.Desktop
                     };
                     var spacePortButton = new Button("Space Port", onClick, onHover);
                     spacePortButton.Position = new Vector2(280, 380);
-                    addChild("spacePortButton", spacePortButton);
+                    AddChild("spacePortButton", spacePortButton);
                 }
             }
 
-            public override void Draw(ForgottenGame game, Vector2 targetSize)
+            public override void Draw(Vector2 targetSize)
             {
-                var spriteBatch = game.spriteBatch;
-
                 if (backgroundTexture == null)
                 {
-                    backgroundTexture = game.Content.Load<Texture2D>("system_pane_background");
-
+                    backgroundTexture = Game().Content.Load<Texture2D>("system_pane_background");
                 }
 
                 Vector2 borderOffset = new Vector2(2, 2);
-                drawColoredRect(game,
-                                Position - borderOffset,
+                DrawColoredRect(Position - borderOffset,
                                 new Vector2(DIALOG_WIDTH, DIALOG_HEIGHT) + borderOffset * 2,
                                 Color.Black);
 
-                spriteBatch.Draw(backgroundTexture,
-                                 Position,
-                                 null, // source rect
-                                 Color.LightGray,
-                                 0,
-                                 Vector2.Zero,
-                                 Vector2.One,
-                                 SpriteEffects.None,
-                                 0);
+                GameSpriteBatch().Draw(backgroundTexture,
+                                       Position,
+                                       null, // source rect
+                                       Color.LightGray,
+                                       0,
+                                       Vector2.Zero,
+                                       Vector2.One,
+                                       SpriteEffects.None,
+                                       0);
                                  
             }
 
@@ -133,8 +127,6 @@ namespace forgotten.Desktop
 
         private class Button : Asset
         {
-            private SpriteBatch spriteBatch;
-            private Texture2D dummyTexture;
             private String text;
             private Vector2 size;
             private MouseTracker mouseTracker = new MouseTracker();
@@ -149,19 +141,17 @@ namespace forgotten.Desktop
                 this.hoverCallback = onHover;
             }
 
-            public override void Draw(ForgottenGame game, Vector2 targetSize)
+            public override void Draw(Vector2 targetSize)
             {
-                var spriteBatch = game.spriteBatch;
-
                 var cornerPos = AbsolutePosition();
 
                 var fillColor = Color.CornflowerBlue;
                 if (isHovered)
                     fillColor = Color.Blue;
 
-                drawColoredRect(game, cornerPos, size, fillColor);
+                DrawColoredRect(cornerPos, size, fillColor);
 
-                spriteBatch.DrawString(normalFont(game), text, cornerPos + new Vector2(10, 0), Color.White);
+                GameSpriteBatch().DrawString(NormalFont(), text, cornerPos + new Vector2(10, 0), Color.White);
             }
 
             public override void Update(Vector2 targetSize, GameTime gameTime)

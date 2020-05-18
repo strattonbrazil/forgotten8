@@ -10,7 +10,7 @@ namespace forgotten.Desktop
             Console.WriteLine(planet.Name);
         }
 
-        public override void Draw(ForgottenGame game, Vector2 targetSize)
+        public override void Draw(Vector2 targetSize)
         {
             //throw new NotImplementedException();
         }
