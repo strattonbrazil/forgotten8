@@ -18,6 +18,7 @@ namespace forgotten.Desktop
         private float animDelay;
         private float lastElapsed; // time passed since last frame update
         private bool initialized = false;
+        public Vector2 Size = new Vector2(0,0); 
 
         private Dictionary<string, string> outlinedParts = new Dictionary<string, string>();
 
@@ -44,6 +45,16 @@ namespace forgotten.Desktop
                     throw new DirectoryNotFoundException();
 
                 FileInfo[] files = dir.GetFiles("*.*");
+                // make sure "base_" is first since it has metadata
+                for (int i = 0; i < files.Length; i++)
+                {
+                    if (files[i].Name.StartsWith("base_")) {
+                        FileInfo tmp = files[0];
+                        files[0] = files[i];
+                        files[i] = tmp;
+                    }
+                }
+
                 foreach (FileInfo file in files)
                 {
                     string key = Path.GetFileNameWithoutExtension(file.Name);

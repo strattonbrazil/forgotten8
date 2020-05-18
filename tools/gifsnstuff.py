@@ -159,7 +159,6 @@ class Window(QWidget):
                             dstSpriteImg = subImg.copy(0, 0,
                                                  part["rect"]["width"],
                                                  part["rect"]["height"] * self.imageReader.imageCount())
-                            dstSpriteImg.save("/tmp/test_write.jpg")
 
                             dstBaseImg = img
                         
@@ -170,9 +169,9 @@ class Window(QWidget):
 
                         self.imageReader.jumpToNextImage()
 
-                    dstSpriteName = "part_%s_%i_%i.jpg" % (part["name"], part["rect"]["x"], part["rect"]["y"])
+                    dstSpriteName = "part_%s_%i_%i.png" % (part["name"], part["rect"]["x"], part["rect"]["y"])
                     dstDir = QDir(self.layeredDir.absoluteFilePath(self.layeredData["output_images"]))
-                    dstBasePath = dstDir.absoluteFilePath("base_count%i_delay%i.jpg" % (self.imageReader.imageCount(), self.imageReader.nextImageDelay()))
+                    dstBasePath = dstDir.absoluteFilePath("base_count%i_delay%i.png" % (self.imageReader.imageCount(), self.imageReader.nextImageDelay()))
                     dstSpritePath = dstDir.absoluteFilePath(dstSpriteName)
 
                     if not dstDir.exists():
@@ -180,8 +179,8 @@ class Window(QWidget):
                         os.makedirs(str(dstDir.absolutePath()))
 
                     print("saving sprite: %s" % dstSpritePath)
-                    dstBaseImg.save(dstBasePath, None, quality=95)
-                    dstSpriteImg.save(dstSpritePath, None, quality=95)
+                    dstBaseImg.save(dstBasePath)
+                    dstSpriteImg.save(dstSpritePath)
             else:
                 print("changes ignored, closing")
             exit(0)
