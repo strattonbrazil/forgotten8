@@ -18,10 +18,12 @@ namespace forgotten.Desktop
         const float WorldHeight = 9;
         const int SystemHitR = 15;
 
-        MouseTracker mouseTracker = new MouseTracker();
+        MouseTracker mouseTracker;
 
         public GalaxyPane()
         {
+            mouseTracker = new MouseTracker(this);
+
             GameRandom rnd = GameRandom.Instance;
 
             float randomFloat(float range, bool centered = false)
@@ -132,7 +134,6 @@ namespace forgotten.Desktop
 
                 if (Vector2.Distance(playerPos, dstPos) < distanceTraveled)
                 { // arrived
-                    Console.WriteLine("arrived!");
                     PaneStack.Instance.Push(new SystemPane(dstSystem));
                     dstSystem = null;
                 }

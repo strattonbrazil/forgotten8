@@ -59,6 +59,8 @@
     <Compile Include="src\TextAsset.cs" />
     <Compile Include="src\SpacePortPane.cs" />
     <Compile Include="src\LayeredAsset.cs" />
+    <Compile Include="src\TraderPane.cs" />
+    <Compile Include="src\ButtonAsset.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework">

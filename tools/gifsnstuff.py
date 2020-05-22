@@ -20,9 +20,6 @@ class Window(QWidget):
             if "base_image" not in self.layeredData:
                 print("no 'base_image' in layered file: %s" % layeredFile)
                 quit(1)
-            elif "output_cs" not in self.layeredData:
-                print("no 'output_cs' in layered file: %s" % layeredFile)
-                quit(1)
             elif "output_images" not in self.layeredData:
                 print("no 'output_images' in layered file: %s" % layeredFile)
                 quit(1)

@@ -13,7 +13,8 @@ namespace forgotten.Desktop
 
         public Vector2 Position { get; set; } = new Vector2();
         private Texture2D dummyTexture;
-        private SpriteFont _normalFont; 
+        private SpriteFont _normalFont;
+        private MouseTracker _mouseTracker;
 
         public Vector2 AbsolutePosition()
         {
@@ -53,6 +54,24 @@ namespace forgotten.Desktop
             foreach (KeyValuePair<String,Asset> kvp in children) {
                 kvp.Value.DrawTree(targetSize);
             }
+        }
+
+        protected MouseTracker mouseTracker()
+        {
+            if (_mouseTracker == null)
+            {
+                Asset asset = this;
+                while (asset.Parent != null)
+                {
+                    asset = asset.Parent;
+                }
+                if (!typeof(Pane).IsInstanceOfType(asset))
+                {
+                    Console.WriteLine("attempting to create MouseTracker outside Pane");
+                }
+                _mouseTracker = new MouseTracker((Pane)asset);
+            }
+            return _mouseTracker;
         }
 
         protected ForgottenGame Game()

@@ -1,2 +1,2 @@
 ﻿=== TODO
-* make Game global reference
+* move "trader" references to "merchant"

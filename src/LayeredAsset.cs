@@ -20,8 +20,6 @@ namespace forgotten.Desktop
 
         private Dictionary<string, string> outlinedParts = new Dictionary<string, string>();
 
-        MouseTracker mouseTracker = new MouseTracker();
-
         public LayeredAsset(String contentDir)
         {
             string baseDir = Directory.GetCurrentDirectory() + "/" + Game().Content.RootDirectory + "/" + contentDir;
@@ -76,6 +74,20 @@ namespace forgotten.Desktop
             outlinedParts.Add(partName, visibleName);
         }
 
+        public bool IsPartHovered(string partName)
+        {
+            foreach (Tuple<string, LayeredPartInfo> part in partTextures)
+            {
+                if (partName == part.Item1)
+                {
+                    LayeredPartInfo partInfo = part.Item2;
+                    return partInfo.MouseHovering;
+                }
+            }
+            Console.WriteLine("unknown part name: " + partName);
+            return false;
+        }
+
         public override void Draw(Vector2 targetSize)
         {
             Vector2 origin = AbsolutePosition();
@@ -121,7 +133,7 @@ namespace forgotten.Desktop
                 {
                     string partLabel = outlinedParts[partName];
                     int border = 4;
-                    if (partInfo.mouseHovering)
+                    if (partInfo.MouseHovering)
                     {
                         DrawColoredOutline(partPos, new Vector2(partInfo.subwidth, partInfo.subheight), new Color(Color.White, 20), border);
 
@@ -138,14 +150,14 @@ namespace forgotten.Desktop
         public override void Update(Vector2 targetSize, GameTime gameTime)
         {
             MouseState ms = Mouse.GetState();
-            mouseTracker.Update(ms);
+            mouseTracker().Update(ms);
 
             Vector2 origin = AbsolutePosition();
             foreach (Tuple<string, LayeredPartInfo> part in partTextures)
             {
                 LayeredPartInfo partInfo = part.Item2;
                 Rectangle screenRect = new Rectangle((int)(origin.X + partInfo.dstX), (int)(origin.Y + partInfo.dstY), partInfo.subwidth, partInfo.subheight);
-                partInfo.mouseHovering = screenRect.Contains(ms.Position);
+                partInfo.MouseHovering = screenRect.Contains(ms.Position);
             }
 
             float elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -165,7 +177,7 @@ namespace forgotten.Desktop
             public readonly int subwidth;
             public readonly int subheight;
             public readonly Texture2D texture;
-            public bool mouseHovering = false;
+            public bool MouseHovering = false;
 
             public LayeredPartInfo(string partKey, Texture2D texture, int subwidth, int subheight)
             {

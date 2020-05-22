@@ -7,10 +7,11 @@ namespace forgotten.Desktop
     {
         private MouseState prevMs;
         private MouseState prevPrevMs;
+        private Pane pane;
 
-        public MouseTracker()
+        public MouseTracker(Pane pane)
         {
-
+            this.pane = pane;
         }
 
         public void Update(MouseState ms)
@@ -21,7 +22,7 @@ namespace forgotten.Desktop
 
         public bool WasPressed()
         {
-            if (prevPrevMs != null && prevMs != null)
+            if (prevPrevMs != null && prevMs != null && pane.IsTopPane())
             {
                 return prevPrevMs.LeftButton == ButtonState.Released && prevMs.LeftButton == ButtonState.Pressed;
             }

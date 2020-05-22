@@ -65,7 +65,7 @@ namespace forgotten.Desktop
                         return true;
                     };
 
-                    var planetButton = new Button(planet.Name, onClick, onHover);
+                    var planetButton = new ButtonAsset(planet.Name, onClick, onHover);
                     planetButton.Position = new Vector2(280 + (planetIndex*160), 280);
                     AddChild("planetButton", planetButton);
                     planetIndex++;
@@ -85,7 +85,7 @@ namespace forgotten.Desktop
                     {
                         return true;
                     };
-                    var spacePortButton = new Button("Space Port", onClick, onHover);
+                    var spacePortButton = new ButtonAsset("Space Port", onClick, onHover);
                     spacePortButton.Position = new Vector2(280, 380);
                     AddChild("spacePortButton", spacePortButton);
                 }
@@ -122,59 +122,6 @@ namespace forgotten.Desktop
                 systemLabel.Position = Position;
                 difficultyLabel.Position = Position + new Vector2(0, 30);
                 planetInfoLabel.Position = new Vector2(480, 380);
-            }
-        }
-
-        private class Button : Asset
-        {
-            private String text;
-            private Vector2 size;
-            private MouseTracker mouseTracker = new MouseTracker();
-            private bool isHovered;
-            private Func<bool> clickCallback;
-            private Func<bool,bool> hoverCallback;
-
-            public Button(String text, Func<bool> onClick, Func<bool,bool> onHover)
-            {
-                this.text = text;
-                this.clickCallback = onClick;
-                this.hoverCallback = onHover;
-            }
-
-            public override void Draw(Vector2 targetSize)
-            {
-                var cornerPos = AbsolutePosition();
-
-                var fillColor = Color.CornflowerBlue;
-                if (isHovered)
-                    fillColor = Color.Blue;
-
-                DrawColoredRect(cornerPos, size, fillColor);
-
-                GameSpriteBatch().DrawString(NormalFont(), text, cornerPos + new Vector2(10, 0), Color.White);
-            }
-
-            public override void Update(Vector2 targetSize, GameTime gameTime)
-            {
-                MouseState ms = Mouse.GetState();
-                mouseTracker.Update(ms);
-
-                size = new Vector2(80, 30);
-
-                var pos = AbsolutePosition();
-                Rectangle buttonRect = new Rectangle((int)pos.X, (int)pos.Y, (int)size.X, (int)size.Y);
-                bool wasHovered = isHovered;
-                isHovered = buttonRect.Contains(ms.X, ms.Y);
-                if (isHovered)
-                    hoverCallback(true);
-                else if (wasHovered)
-                    hoverCallback(false);
-
-
-                if (isHovered && mouseTracker.WasPressed())
-                {
-                    clickCallback();
-                }
             }
         }
     }
