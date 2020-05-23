@@ -26,6 +26,7 @@ namespace forgotten.Desktop
             graphics = new GraphicsDeviceManager(this);
             graphics.PreferredBackBufferWidth = 1254;
             graphics.PreferredBackBufferHeight = 716;
+            graphics.PreferMultiSampling = true;
             Content.RootDirectory = "Content";
         }
 

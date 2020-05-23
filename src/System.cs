@@ -12,6 +12,7 @@ namespace forgotten.Desktop
         public float Difficulty;
 
         public List<Planet> Planets = new List<Planet>();
+        public List<System> Neighbors = new List<System>();
 
         public static List<System> Systems = new List<System>();
 
@@ -21,20 +22,20 @@ namespace forgotten.Desktop
 
             GameRandom rnd = GameRandom.Instance;
 
-            float colorSpace = (float)rnd.NextDouble();
-            if (colorSpace < .3)
-            {
-                Color = new Color(150, 250, 250);
-            }
-            else if (colorSpace < .7)
-            {
-                Color = new Color(250, 150, 250);
-            }
-            else
-            {
-                Color = new Color(250, 250, 150);
-            }
+            float rads = (float)(Math.Atan2(position.Y, position.X) + Math.PI);
 
+            rads += rnd.NextFloat() * 0.5f;
+            rads -= rnd.NextFloat() * 0.5f;
+
+            if (rads > Math.PI*1.5f && rads < Math.PI * 2) {
+                Color = new Color(255, 50, 50);
+            } else if (rads > Math.PI && rads < Math.PI * 2) {
+                Color = new Color(255, 255, 50);
+            } else if (rads > Math.PI* 0.5f && rads < Math.PI * 2) {
+                Color = new Color(50, 255, 255);
+            } else { // A
+                Color = new Color(255, 50, 255);
+            }
 
             float planetRnd = (float)rnd.NextDouble();
             if (planetRnd < 0.1)

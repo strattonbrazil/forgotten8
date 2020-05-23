@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -17,13 +18,9 @@ namespace forgotten.Desktop
         const float WorldWidth = 16;
         const float WorldHeight = 9;
         const int SystemHitR = 15;
-
-        MouseTracker mouseTracker;
-
+        
         public GalaxyPane()
         {
-            mouseTracker = new MouseTracker(this);
-
             GameRandom rnd = GameRandom.Instance;
 
             float randomFloat(float range, bool centered = false)
@@ -35,6 +32,8 @@ namespace forgotten.Desktop
                 }
                 return val;
             }
+
+            System[,] systemsArray = new System[(int)WorldHeight,(int)WorldWidth];
 
             for (int x = 0; x < WorldWidth; x++)
             {
@@ -51,13 +50,41 @@ namespace forgotten.Desktop
                         System system = new System(initPos);
                         system.Difficulty = initPos.Length() / new Vector2(HalfWorldWidth, HalfWorldHeight).Length();
                         System.Systems.Add(system);
+
+                        systemsArray[y, x] = system;
+                    }
+                }
+            }
+
+            const int radius = 1;
+            for (int x = 0; x < WorldWidth; x++)
+            {
+                for (int y = 0; y < WorldHeight; y++)
+                {
+                    var system = systemsArray[y, x];
+                    if (system != null)
+                    {
+                        for (int neighborX = -radius + x; neighborX <= x + radius; neighborX++)
+                        {
+                            for (int neighborY = -radius + y; neighborY <= y + radius; neighborY++)
+                            {
+                                if (neighborX >= 0 && neighborX < WorldWidth && neighborY >= 0 && neighborY < WorldHeight && (neighborX != x || neighborY != y))
+                                {
+                                    var neighborSystem = systemsArray[neighborY, neighborX];
+                                    if (neighborSystem != null)
+                                    {
+                                        system.Neighbors.Add(neighborSystem);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
 
             // generate planet names
             {
-                String[] PLANET_NAMES = {
+                String[] SYSTEM_NAMES = {
                     "Fremulon",
                     "Erakis",
                     "Hyporayon",
@@ -86,7 +113,7 @@ namespace forgotten.Desktop
                 {
                     if (s.Name == null)
                     {
-                        s.Name = PLANET_NAMES[count % PLANET_NAMES.Length];
+                        s.Name = SYSTEM_NAMES[count % SYSTEM_NAMES.Length];
                         count++;
                     }
                 }
@@ -115,10 +142,10 @@ namespace forgotten.Desktop
         public override void Update(Vector2 targetSize, GameTime gameTime)
         {
             MouseState ms = Mouse.GetState();
-            mouseTracker.Update(ms);
+            mouseTracker().Update(ms);
             hoverSystem = GetSystem(targetSize, ms.Position);
 
-            if (IsTopPane() && mouseTracker.WasPressed() && hoverSystem != null && dstSystem == null)
+            if (IsTopPane() && mouseTracker().WasPressed() && hoverSystem != null && dstSystem == null)
             {
                 dstSystem = hoverSystem;
             }
@@ -170,17 +197,33 @@ namespace forgotten.Desktop
                 DrawColoredRect(hoverPos, texToScreen, Color.YellowGreen);
             }
 
+            // draw connections
+            //
             foreach (System system in System.Systems)
             {
+                Vector2 systemScreenPos = su.WorldToScreen(system.Position);
+
+                // NOTE: this draws each line twice
+                foreach (System neighbor in system.Neighbors)
+                {
+                    Vector2 neighborScreenPos = su.WorldToScreen(neighbor.Position);
+                    DrawColoredLine(systemScreenPos, neighborScreenPos, new Color(Color.Gray, 20), 1);
+                }
+            }
+
+            // draw systems
+            //
+            foreach (System system in System.Systems)
+            {
+                float spriteRadius = 3 + (int)Math.Ceiling(Math.Sqrt(system.Planets.Count));
+                Vector2 systemScreenPos = su.WorldToScreen(system.Position);
+
                 // draw system
                 //
-                float spriteRadius = 3 + (int)Math.Ceiling(Math.Sqrt(system.Planets.Count));
-                Vector2 systemScreenPos = su.WorldToScreen(system.Position) - new Vector2(spriteRadius, spriteRadius);
-
                 float texToScreenRatio = spriteRadius * 2.0f / systemTexture.Width;
                 Vector2 texToScreen = new Vector2(texToScreenRatio, texToScreenRatio);
-                GameSpriteBatch().Draw(systemTexture, 
-                                       systemScreenPos, 
+                GameSpriteBatch().Draw(systemTexture,
+                                       systemScreenPos - new Vector2(spriteRadius, spriteRadius), 
                                        null, // source rect
                                        system.Color,
                                        0,
@@ -188,7 +231,9 @@ namespace forgotten.Desktop
                                        texToScreen,
                                        SpriteEffects.None,
                                        0);
-
+                                       
+                // draw label
+                //
                 float nameWidth = NormalFont().MeasureString(system.Name).X;
                 Vector2 namePos = su.WorldToScreen(system.Position) + new Vector2(-nameWidth * 0.5f, 10);
                 namePos = new Vector2((int)namePos.X, (int)namePos.Y);

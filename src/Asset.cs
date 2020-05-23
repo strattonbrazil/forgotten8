@@ -125,6 +125,28 @@ namespace forgotten.Desktop
             DrawColoredRect(pos + new Vector2(border, 0), new Vector2(size.X - border*2, border), color);
         }
 
+        protected void DrawColoredLine(Vector2 a, Vector2 b, Color color, float lineWidth)
+        {
+            if (dummyTexture == null)
+            {
+                CreateDummyTexture();
+            }
+
+            Vector2 d = b - a;
+
+            float rot = (float)(-Math.Atan2(-d.Y, d.X)) + (float)Math.PI * 1.5f;
+
+            GameSpriteBatch().Draw(dummyTexture,
+                                   a,
+                                   null, // source rect
+                                   color,
+                                   rot,
+                                   Vector2.Zero,
+                                   new Vector2(lineWidth, d.Length()),
+                                   SpriteEffects.None,
+                                   0);
+        }
+
         private void CreateDummyTexture()
         {
             dummyTexture = new Texture2D(Game().GraphicsDevice, 1, 1);
