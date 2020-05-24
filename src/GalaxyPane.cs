@@ -207,7 +207,7 @@ namespace forgotten.Desktop
                 foreach (System neighbor in system.Neighbors)
                 {
                     Vector2 neighborScreenPos = su.WorldToScreen(neighbor.Position);
-                    DrawColoredLine(systemScreenPos, neighborScreenPos, new Color(Color.Gray, 20), 1);
+                    DrawColoredLine(systemScreenPos, neighborScreenPos, Color.Gray * 0.4f, 1);
                 }
             }
 

@@ -135,12 +135,12 @@ namespace forgotten.Desktop
                     int border = 4;
                     if (partInfo.MouseHovering)
                     {
-                        DrawColoredOutline(partPos, new Vector2(partInfo.subwidth, partInfo.subheight), new Color(Color.White, 20), border);
+                        DrawColoredOutline(partPos, new Vector2(partInfo.subwidth, partInfo.subheight), Color.White, border);
 
                     }
                     else
                     {
-                        DrawColoredOutline(partPos, new Vector2(partInfo.subwidth, partInfo.subheight), new Color(Color.Black, 20), border);
+                        DrawColoredOutline(partPos, new Vector2(partInfo.subwidth, partInfo.subheight), Color.White * 0.2f, border);
                     }
                     GameSpriteBatch().DrawString(NormalFont(), partLabel, partPos - new Vector2(0, NormalFont().LineSpacing), Color.White);
                 }
