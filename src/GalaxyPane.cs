@@ -263,16 +263,7 @@ namespace forgotten.Desktop
             if (systemTexture == null)
             {
                 systemTexture = Game().Content.Load<Texture2D>("system");
-
-                const int PLAYER_WIDTH = 8;
-                const int PLAYER_HEIGHT = 12;
-                playerTexture = new Texture2D(Game().GraphicsDevice, PLAYER_WIDTH, PLAYER_HEIGHT);
-                Color[] data = new Color[PLAYER_WIDTH * PLAYER_HEIGHT];
-                for (int i = 0; i < PLAYER_WIDTH * PLAYER_HEIGHT; i++)
-                {
-                    data[i] = Color.CornflowerBlue;
-                }
-                playerTexture.SetData(data);
+                playerTexture = Game().Content.Load<Texture2D>("galaxy_player_ship");
             }
 
             Vector2 worldSize = new Vector2(WorldWidth, WorldHeight);

@@ -35,16 +35,6 @@ namespace forgotten.Desktop
             return new SpriteBatch(GraphicsDevice);
         }
 
-        /*
-        public Texture2D CreateDummyTexture()
-        {
-            var dummyTexture = new Texture2D(GraphicsDevice, 1, 1);
-            Color[] dummyData = new Color[] { Color.White };
-            dummyTexture.SetData(dummyData);
-            return dummyTexture;
-        }
-        */
-
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.
         /// This is where it can query for any required services and load any non-graphic
