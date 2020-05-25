@@ -11,10 +11,10 @@ namespace forgotten.Desktop
         private Texture2D systemTexture;
         private Texture2D playerTexture;
 
+        private bool traveling = false;
         private List<System> travelPath;
         private System currentSystem;
         private System hoverSystem;
-        private System dstSystem;
         private Vector2 playerPos = new Vector2(0,0);
 
         const float WorldWidth = 16;
@@ -109,6 +109,7 @@ namespace forgotten.Desktop
                 }
 
                 System.Systems[closestSystemId].SetHomeSystem();
+                currentSystem = System.Systems[closestSystemId];
 
                 int count = 0;
                 foreach (System s in System.Systems)
@@ -197,8 +198,6 @@ namespace forgotten.Desktop
                 }
             }
 
-
-
             return info;
         }
 
@@ -214,31 +213,47 @@ namespace forgotten.Desktop
             mouseTracker().Update(ms);
             hoverSystem = GetSystem(targetSize, ms.Position);
 
-            travelPath = null;
-            if (hoverSystem != null && dstSystem == null && currentSystem != null) // not traveling yet
+            if (hoverSystem != null && currentSystem != null && !traveling) // not traveling yet
             {
                 travelPath = GetSystemPath(currentSystem, hoverSystem);
             }
 
-            if (IsTopPane() && mouseTracker().WasPressed() && hoverSystem != null && dstSystem == null)
+            if (IsTopPane() && mouseTracker().WasPressed() && hoverSystem != null && !traveling)
             {
-                dstSystem = hoverSystem;
+                traveling = true;
             }
 
             float worldVelocity = 2;
-            if (dstSystem != null)
+            if (traveling && travelPath != null)
             {
-                Vector2 dstPos = dstSystem.Position;
-                Vector2 dir = Vector2.Normalize(dstPos - playerPos);
+                System next = currentSystem;
+                for (int i = 0; i < travelPath.Count - 1; i++)
+                {
+                    if (travelPath[i] == currentSystem)
+                    {
+                        next = travelPath[i + 1];
+                    }
+                }
 
+                Vector2 dstPos = next.Position;
+                Vector2 dir = Vector2.Normalize(dstPos - playerPos);
                 float distanceTraveled = worldVelocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
                 playerPos = playerPos + (dir * distanceTraveled);
 
                 if (Vector2.Distance(playerPos, dstPos) < distanceTraveled)
-                { // arrived
-                    PaneStack.Instance.Push(new SystemPane(dstSystem));
-                    currentSystem = dstSystem;
-                    dstSystem = null;
+                {
+                    if (next == currentSystem || next == travelPath[travelPath.Count - 1])
+                    { // arrived
+                        traveling = false;
+                        travelPath = null;
+
+                        PaneStack.Instance.Push(new SystemPane(next));
+
+                    }
+                    else
+                    { // possibly stop for encounter
+                    }
+                    currentSystem = next;
                 }
             }
         }
