@@ -11,6 +11,8 @@ namespace forgotten.Desktop
         private Texture2D systemTexture;
         private Texture2D playerTexture;
 
+        private List<System> travelPath;
+        private System currentSystem;
         private System hoverSystem;
         private System dstSystem;
         private Vector2 playerPos = new Vector2(0,0);
@@ -139,11 +141,84 @@ namespace forgotten.Desktop
             return null;
         }
 
+        private List<System> GetSystemPath(System start, System end)
+        {
+            SystemPathInfo systemPathInfo = GetSystemPaths(start);
+
+            List<System> path = new List<System>();
+
+            System last = end;
+            while (last != null)
+            {
+                path.Insert(0, last);
+                last = systemPathInfo.prev[last];
+            }
+
+            return path;
+        }
+
+        private SystemPathInfo GetSystemPaths(System start)
+        {
+            HashSet<System> queue = new HashSet<System>();
+            SystemPathInfo info = new SystemPathInfo();
+            foreach (System system in System.Systems)
+            {
+                queue.Add(system);
+                info.dist[system] = Int32.MaxValue;
+                info.prev[system] = null;
+            }
+            info.dist[start] = 0;
+
+            while (queue.Count > 0)
+            {
+                System closest = null;
+                foreach (System system in queue)
+                {
+                    if (closest == null || info.dist[system] < info.dist[closest])
+                    {
+                        closest = system;
+                    }
+                }
+
+                queue.Remove(closest);
+
+                foreach (System neighbor in closest.Neighbors)
+                {
+                    if (queue.Contains(neighbor))
+                    {
+                        int weight = 1; // from closest to neighbor
+                        int alt = info.dist[closest] + weight;
+                        if (alt < info.dist[neighbor])
+                        {
+                            info.dist[neighbor] = alt;
+                            info.prev[neighbor] = closest;
+                        }
+                    }
+                }
+            }
+
+
+
+            return info;
+        }
+
+        private class SystemPathInfo
+        {
+            public Dictionary<System, Int32> dist = new Dictionary<System, int>();
+            public Dictionary<System, System> prev = new Dictionary<System, System>();
+        }
+
         public override void Update(Vector2 targetSize, GameTime gameTime)
         {
             MouseState ms = Mouse.GetState();
             mouseTracker().Update(ms);
             hoverSystem = GetSystem(targetSize, ms.Position);
+
+            travelPath = null;
+            if (hoverSystem != null && dstSystem == null && currentSystem != null) // not traveling yet
+            {
+                travelPath = GetSystemPath(currentSystem, hoverSystem);
+            }
 
             if (IsTopPane() && mouseTracker().WasPressed() && hoverSystem != null && dstSystem == null)
             {
@@ -162,6 +237,7 @@ namespace forgotten.Desktop
                 if (Vector2.Distance(playerPos, dstPos) < distanceTraveled)
                 { // arrived
                     PaneStack.Instance.Push(new SystemPane(dstSystem));
+                    currentSystem = dstSystem;
                     dstSystem = null;
                 }
             }
@@ -207,7 +283,10 @@ namespace forgotten.Desktop
                 foreach (System neighbor in system.Neighbors)
                 {
                     Vector2 neighborScreenPos = su.WorldToScreen(neighbor.Position);
-                    DrawColoredLine(systemScreenPos, neighborScreenPos, Color.Gray * 0.4f, 1);
+                    if (travelPath != null && travelPath.Contains(system) && travelPath.Contains(neighbor))
+                    {
+                        DrawColoredLine(systemScreenPos, neighborScreenPos, Color.Gray * 0.4f, 1);
+                    }
                 }
             }
 
