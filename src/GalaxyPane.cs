@@ -165,7 +165,7 @@ namespace forgotten.Desktop
             foreach (System system in System.Systems)
             {
                 queue.Add(system);
-                info.dist[system] = Int32.MaxValue;
+                info.dist[system] = float.MaxValue;
                 info.prev[system] = null;
             }
             info.dist[start] = 0;
@@ -187,8 +187,8 @@ namespace forgotten.Desktop
                 {
                     if (queue.Contains(neighbor))
                     {
-                        int weight = 1; // from closest to neighbor
-                        int alt = info.dist[closest] + weight;
+                        float weight = Vector2.Distance(closest.Position, neighbor.Position);
+                        float alt = info.dist[closest] + weight;
                         if (alt < info.dist[neighbor])
                         {
                             info.dist[neighbor] = alt;
@@ -203,7 +203,7 @@ namespace forgotten.Desktop
 
         private class SystemPathInfo
         {
-            public Dictionary<System, Int32> dist = new Dictionary<System, int>();
+            public Dictionary<System, float> dist = new Dictionary<System, float>();
             public Dictionary<System, System> prev = new Dictionary<System, System>();
         }
 
