@@ -46,7 +46,6 @@ class Window(QWidget):
         imgPath = self.layeredDir.absoluteFilePath(self.layeredData["base_image"])
         self.imageReader = QImageReader(imgPath)
 
-
     def updateFrame(self):
         self.frameIndex = self.frameIndex + 1
         if self.frameIndex == self.imageReader.imageCount(): # reload

@@ -49,7 +49,6 @@ namespace forgotten.Desktop
             else if (wasHovered)
                 hoverCallback(false);
 
-
             if (isHovered && mouseTracker().WasPressed())
             {
                 clickCallback();

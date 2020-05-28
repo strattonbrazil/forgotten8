@@ -24,11 +24,11 @@ namespace forgotten.Desktop
             trader.Position = new Vector2(200, 100);
             AddChild("traderLayered", trader);
 
-            yourSide = (TextAsset)AddChild("yours", new TextAsset("Player"));
-            theirSide = (TextAsset)AddChild("yours", new TextAsset("Merchant"));
+            yourSide = AddChild("yours", new TextAsset("Player"));
+            theirSide = AddChild("yours", new TextAsset("Merchant"));
 
-            yourMoney = (TextAsset)AddChild("yours", new TextAsset("$1840"));
-            theirMoney = (TextAsset)AddChild("theres", new TextAsset("$15000"));
+            yourMoney = AddChild("yours", new TextAsset("$1840"));
+            theirMoney = AddChild("theres", new TextAsset("$15000"));
 
             lines.Add(new LineItem()
             {
@@ -73,7 +73,7 @@ namespace forgotten.Desktop
         private TextAsset makeText(string s)
         {
             var asset = new TextAsset(s);
-            return (TextAsset)AddChild(s, asset);
+            return AddChild(s, asset);
         }
 
         private ButtonAsset makeButton(string s, bool less, int index)
@@ -115,7 +115,7 @@ namespace forgotten.Desktop
                 return true;
             };
             var asset = new ButtonAsset(s, onClick, onHover);
-            return (ButtonAsset)AddChild(s, asset);
+            return AddChild(s, asset);
         }
 
         public override void Draw(Vector2 targetSize)

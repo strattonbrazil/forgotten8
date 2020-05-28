@@ -165,7 +165,7 @@ namespace forgotten.Desktop
             while (lastElapsed > animDelay)
             {
                 lastElapsed -= animDelay;
-                currFrame += 1;
+                currFrame = (currFrame + 1) % numFrames;
             }
         }
 

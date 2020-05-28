@@ -28,7 +28,7 @@ namespace forgotten.Desktop
             return pos;
         }
 
-        public Asset AddChild(String name, Asset asset)
+        public T AddChild<T>(String name, T asset) where T : Asset
         {
             asset.Parent = this;
             children.Add(new KeyValuePair<string, Asset>(name, asset));

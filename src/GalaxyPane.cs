@@ -250,10 +250,14 @@ namespace forgotten.Desktop
                         PaneStack.Instance.Push(new SystemPane(next));
 
                     }
-                    else
-                    { // possibly stop for encounter
-                    }
                     currentSystem = next;
+                } else if (GameRandom.Instance.NextFloat() < 0.1f)
+                {
+                    // possibly stop for encounter
+                    traveling = false;
+                    travelPath = null;
+
+                    PaneStack.Instance.Push(new EncounterPane(next));
                 }
             }
         }

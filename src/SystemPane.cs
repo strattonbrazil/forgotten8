@@ -37,9 +37,9 @@ namespace forgotten.Desktop
             {
                 this.system = system;
 
-                systemLabel = (TextAsset)AddChild("systemLabel", new TextAsset(system.Name));
-                difficultyLabel = (TextAsset)AddChild("difficultyLabel", new TextAsset(system.Difficulty.ToString()));
-                planetInfoLabel = (TextAsset)AddChild("difficultyLabel", new TextAsset());
+                systemLabel = AddChild("systemLabel", new TextAsset(system.Name));
+                difficultyLabel = AddChild("difficultyLabel", new TextAsset(system.Difficulty.ToString()));
+                planetInfoLabel = AddChild("difficultyLabel", new TextAsset());
 
                 int planetIndex = 0;
                 foreach (Planet planet in system.Planets)
