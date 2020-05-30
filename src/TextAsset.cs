@@ -13,6 +13,7 @@ namespace forgotten.Desktop
 
         private string lastText;
         private List<TextBlurb> blurbs = new List<TextBlurb>();
+        private float animOffset = 0;
 
         public TextAsset(String text = "")
         {
@@ -21,6 +22,7 @@ namespace forgotten.Desktop
 
         public override void Draw(Vector2 targetSize)
         {
+            DrawText(Color.Black, new Vector2(-1, -1));
             DrawText(Color.Black, new Vector2(1, 1));
             DrawText(Color.White, Vector2.Zero);
         }
@@ -32,8 +34,8 @@ namespace forgotten.Desktop
             foreach (TextBlurb blurb in blurbs)
             {
                 var moved = pos + blurb.Position;
-                //moved.X = (float)Math.Floor(moved.X);
-                //moved.Y = (float)Math.Floor(moved.Y);
+                if (blurb.Animated)
+                    moved.X += animOffset;
                 GameSpriteBatch().DrawString(NormalFont(), blurb.Text, moved, color);
             }
         }
@@ -46,11 +48,8 @@ namespace forgotten.Desktop
                 lastText = Text;
             }
 
-            foreach (TextBlurb blurb in blurbs)
-            {
-                if (blurb.Animated)
-                    blurb.Position += new Vector2(0, 0.1f);
-            }
+            var gameTimeFlat = (int)gameTime.TotalGameTime.TotalSeconds;
+            animOffset = 2 * (gameTimeFlat % 2) - 1;
         }
 
         private void UpdatePositions()
