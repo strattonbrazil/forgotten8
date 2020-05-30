@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -30,7 +31,10 @@ namespace forgotten.Desktop
 
             foreach (TextBlurb blurb in blurbs)
             {
-                GameSpriteBatch().DrawString(NormalFont(), blurb.Text, pos + blurb.Position, color);
+                var moved = pos + blurb.Position;
+                //moved.X = (float)Math.Floor(moved.X);
+                //moved.Y = (float)Math.Floor(moved.Y);
+                GameSpriteBatch().DrawString(NormalFont(), blurb.Text, moved, color);
             }
         }
 
@@ -40,6 +44,12 @@ namespace forgotten.Desktop
             {
                 UpdatePositions();
                 lastText = Text;
+            }
+
+            foreach (TextBlurb blurb in blurbs)
+            {
+                if (blurb.Animated)
+                    blurb.Position += new Vector2(0, 0.1f);
             }
         }
 
@@ -66,12 +76,7 @@ namespace forgotten.Desktop
                     {
                         if (NormalFont().MeasureString(line + " " + words[0]).X > MaxLineLength)
                         {
-                            //GameSpriteBatch().DrawString(NormalFont(), line, pos + new Vector2(0, lineOffset), color);
-                            blurbs.Add(new TextBlurb()
-                            {
-                                Text = line,
-                                Position = new Vector2(0, lineOffset)
-                            });
+                            AddLine(line, lineOffset);
                             lineOffset += lineSpacing;
                             line = words[0]; // handle this word on the following line
                         }
@@ -86,14 +91,27 @@ namespace forgotten.Desktop
                     }
                     if (line.Length != 0)
                     {
-                        blurbs.Add(new TextBlurb()
-                        {
-                            Text = line,
-                            Position = new Vector2(0, lineOffset)
-                        });
+                        AddLine(line, lineOffset);
                         lineOffset += lineSpacing;
                     }
                 }
+            }
+        }
+
+        private void AddLine(string line, int lineOffset)
+        {
+            Console.WriteLine("adding line: " + line);
+            float lineIndent = 0;
+            string[] parts = Regex.Split(line, @"(\*[a-z]+\*)+");
+            foreach (string part in parts)
+            {
+                blurbs.Add(new TextBlurb()
+                {
+                    Text = part,
+                    Position = new Vector2(lineIndent, lineOffset),
+                    Animated = part.StartsWith("*") && part.EndsWith("*")
+                });
+                lineIndent += NormalFont().MeasureString(part).X;
             }
         }
 
@@ -101,6 +119,7 @@ namespace forgotten.Desktop
         {
             public string Text;
             public Vector2 Position;
+            public bool Animated;
         }
     }
 }
