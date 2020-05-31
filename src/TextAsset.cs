@@ -22,7 +22,7 @@ namespace forgotten.Desktop
 
         public override void Draw(Vector2 targetSize)
         {
-            DrawText(Color.Black, new Vector2(-1, -1));
+            DrawText(Color.Black * 0.2f, new Vector2(-1, -1));
             DrawText(Color.Black, new Vector2(1, 1));
             DrawText(Color.White, Vector2.Zero);
         }

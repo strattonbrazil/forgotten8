@@ -6,8 +6,8 @@ namespace forgotten.Desktop
 {
     public class ButtonAsset : Asset
     {
+        public Vector2 Size; 
         private String text;
-        private Vector2 size;
         private bool isHovered;
         private Func<bool> clickCallback;
         private Func<bool, bool> hoverCallback;
@@ -18,6 +18,8 @@ namespace forgotten.Desktop
             this.text = text;
             this.clickCallback = onClick;
             this.hoverCallback = onHover;
+
+            UpdateSize();
         }
 
         public override void Draw(Vector2 targetSize)
@@ -28,9 +30,10 @@ namespace forgotten.Desktop
             if (isHovered)
                 fillColor = Color.Blue;
 
-            DrawColoredRect(cornerPos, size, fillColor);
+            DrawColoredRect(cornerPos, Size, fillColor);
 
-            GameSpriteBatch().DrawString(NormalFont(), text, cornerPos + new Vector2(padding, 0), Color.White);
+            Console.WriteLine("button text: " + text);
+            GameSpriteBatch().DrawString(NormalFont(), text, cornerPos + new Vector2(padding, padding), Color.White);
         }
 
         public override void Update(Vector2 targetSize, GameTime gameTime)
@@ -38,10 +41,10 @@ namespace forgotten.Desktop
             MouseState ms = Mouse.GetState();
             mouseTracker().Update(ms);
 
-            size = new Vector2(NormalFont().MeasureString(text).X + padding*2, 30);
+            UpdateSize();
 
             var pos = AbsolutePosition();
-            Rectangle buttonRect = new Rectangle((int)pos.X, (int)pos.Y, (int)size.X, (int)size.Y);
+            Rectangle buttonRect = new Rectangle((int)pos.X, (int)pos.Y, (int)Size.X, (int)Size.Y);
             bool wasHovered = isHovered;
             isHovered = buttonRect.Contains(ms.X, ms.Y);
             if (isHovered)
@@ -55,5 +58,10 @@ namespace forgotten.Desktop
             }
         }
 
+        private void UpdateSize()
+        {
+            var fm = NormalFont().MeasureString(text);
+            Size = new Vector2(fm.X + padding * 2, fm.Y + padding * 2);
+        }
     }
 }
