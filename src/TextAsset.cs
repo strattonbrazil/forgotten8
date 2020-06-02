@@ -14,10 +14,13 @@ namespace forgotten.Desktop
         private string lastText;
         private List<TextBlurb> blurbs = new List<TextBlurb>();
         private float animOffset = 0;
+        public Vector2 Size;
 
         public TextAsset(String text = "")
         {
             this.Text = text;
+
+            UpdatePositions();
         }
 
         public override void Draw(Vector2 targetSize)
@@ -95,11 +98,14 @@ namespace forgotten.Desktop
                     }
                 }
             }
+
+
+            var fm = NormalFont().MeasureString(Text);
+            Size = new Vector2(fm.X, fm.Y);
         }
 
         private void AddLine(string line, int lineOffset)
         {
-            Console.WriteLine("adding line: " + line);
             float lineIndent = 0;
             string[] parts = Regex.Split(line, @"(\*[a-z]+\*)+");
             foreach (string part in parts)

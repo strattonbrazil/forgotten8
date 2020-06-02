@@ -7,17 +7,23 @@ namespace forgotten.Desktop
     public class ButtonAsset : Asset
     {
         public Vector2 Size; 
-        private String text;
+        //private String text;
         private bool isHovered;
         private Func<bool> clickCallback;
         private Func<bool, bool> hoverCallback;
         private int padding = 10;
+        private TextAsset textAsset;
 
         public ButtonAsset(String text, Func<bool> onClick, Func<bool, bool> onHover)
         {
-            this.text = text;
+            Console.WriteLine("creating button: " + text);
+            Console.WriteLine("mouse tracker: " + _mouseTracker);
+
             this.clickCallback = onClick;
             this.hoverCallback = onHover;
+
+            textAsset = AddChild("text", new TextAsset(text));
+            textAsset.Position = new Vector2(padding, padding);
 
             UpdateSize();
         }
@@ -31,9 +37,6 @@ namespace forgotten.Desktop
                 fillColor = Color.Blue;
 
             DrawColoredRect(cornerPos, Size, fillColor);
-
-            Console.WriteLine("button text: " + text);
-            GameSpriteBatch().DrawString(NormalFont(), text, cornerPos + new Vector2(padding, padding), Color.White);
         }
 
         public override void Update(Vector2 targetSize, GameTime gameTime)
@@ -54,14 +57,14 @@ namespace forgotten.Desktop
 
             if (isHovered && mouseTracker().WasPressed())
             {
+                Console.WriteLine("clicked: " + textAsset.Text);
                 clickCallback();
             }
         }
 
         private void UpdateSize()
         {
-            var fm = NormalFont().MeasureString(text);
-            Size = new Vector2(fm.X + padding * 2, fm.Y + padding * 2);
+            Size = textAsset.Size + new Vector2(padding * 2, padding * 2);
         }
     }
 }

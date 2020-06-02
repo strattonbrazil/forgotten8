@@ -5,8 +5,8 @@ namespace forgotten.Desktop
 {
     public class MouseTracker
     {
-        private MouseState prevMs;
-        private MouseState prevPrevMs;
+        public MouseState? prevMs = null;
+        public MouseState? prevPrevMs = null;
         private Pane pane;
 
         public MouseTracker(Pane pane)
@@ -24,7 +24,7 @@ namespace forgotten.Desktop
         {
             if (prevPrevMs != null && prevMs != null && pane.IsTopPane())
             {
-                return prevPrevMs.LeftButton == ButtonState.Released && prevMs.LeftButton == ButtonState.Pressed;
+                return prevPrevMs.Value.LeftButton == ButtonState.Released && prevMs.Value.LeftButton == ButtonState.Pressed;
             }
             return false;
         }

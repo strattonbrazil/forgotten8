@@ -14,7 +14,7 @@ namespace forgotten.Desktop
         public Vector2 Position { get; set; } = new Vector2();
         private Texture2D dummyTexture;
         private SpriteFont _normalFont;
-        private MouseTracker _mouseTracker;
+        public MouseTracker _mouseTracker;
 
         public Vector2 AbsolutePosition()
         {
