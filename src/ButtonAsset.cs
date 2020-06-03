@@ -16,9 +16,6 @@ namespace forgotten.Desktop
 
         public ButtonAsset(String text, Func<bool> onClick, Func<bool, bool> onHover)
         {
-            Console.WriteLine("creating button: " + text);
-            Console.WriteLine("mouse tracker: " + _mouseTracker);
-
             this.clickCallback = onClick;
             this.hoverCallback = onHover;
 
@@ -57,7 +54,6 @@ namespace forgotten.Desktop
 
             if (isHovered && mouseTracker().WasPressed())
             {
-                Console.WriteLine("clicked: " + textAsset.Text);
                 clickCallback();
             }
         }

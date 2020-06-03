@@ -76,6 +76,8 @@ namespace forgotten.Desktop
                     Text = @" (enter combat) ",
                     Outcome = delegate (DialogueState prevState)
                     {
+                        PaneStack.Instance.Pop();
+                        PaneStack.Instance.Push(new BattlePane());
                         return null;
                     }
                 }

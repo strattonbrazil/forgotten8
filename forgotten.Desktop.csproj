@@ -64,6 +64,7 @@
     <Compile Include="src\EncounterPane.cs" />
     <Compile Include="src\AnimatedAsset.cs" />
     <Compile Include="src\AlienEncounter.cs" />
+    <Compile Include="src\BattlePane.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework">

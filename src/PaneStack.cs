@@ -17,6 +17,11 @@ namespace forgotten.Desktop
             panes.Add(pane);
         }
 
+        public void Pop()
+        {
+            panes.RemoveAt(panes.Count - 1);
+        }
+
         public static PaneStack Instance
         {
             get
