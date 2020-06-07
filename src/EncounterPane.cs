@@ -31,11 +31,11 @@ namespace forgotten.Desktop
         public override void Draw(Vector2 targetSize)
         {
             DrawColoredRect(new Vector2(padding, padding),
-                            new Vector2(targetSize.X - 2 * padding, self.Height()),
+                            new Vector2(targetSize.X - 2 * padding, self.TexHeight()),
                             Color.Red);
 
-            DrawColoredRect(new Vector2(padding, targetSize.Y - padding - self.Height()),
-                            new Vector2(targetSize.X - 2 * padding, self.Height()),
+            DrawColoredRect(new Vector2(padding, targetSize.Y - padding - self.TexHeight()),
+                            new Vector2(targetSize.X - 2 * padding, self.TexHeight()),
                             Color.CornflowerBlue);
         }
 
@@ -43,10 +43,10 @@ namespace forgotten.Desktop
         {
             alienText.Text = dialogueStateMachine.Text();
             alienText.Position = new Vector2(2 * padding, 2 * padding);
-            alienText.MaxLineLength = (int)(targetSize.X - 4 * padding - alien.Width());
-            alien.Position = new Vector2(targetSize.X - 2 * padding - alien.Width(), 2 * padding);
+            alienText.MaxLineLength = (int)(targetSize.X - 4 * padding - alien.TexWidth());
+            alien.Position = new Vector2(targetSize.X - 2 * padding - alien.TexWidth(), 2 * padding);
 
-            self.Position = new Vector2(2*padding, targetSize.Y - self.Height() - 2*padding);
+            self.Position = new Vector2(2*padding, targetSize.Y - self.TexHeight() - 2*padding);
 
             // remove all the previous buttons
             if (dialogueStateMachine.State() != prevDialogState)
@@ -54,7 +54,7 @@ namespace forgotten.Desktop
                 children = children.FindAll(pair => !typeof(ButtonAsset).IsInstanceOfType(pair.Value));
                 buttons.Clear();
 
-                var buttonPos = new Vector2(3 * padding + self.Width(), targetSize.Y - self.Height());
+                var buttonPos = new Vector2(3 * padding + self.TexWidth(), targetSize.Y - self.TexHeight());
                 float buttonOffset = 0;
                 int buttonIndex = 0;
                 foreach (DialogueOption option in dialogueStateMachine.Options())

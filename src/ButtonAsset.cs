@@ -39,7 +39,7 @@ namespace forgotten.Desktop
         public override void Update(Vector2 targetSize, GameTime gameTime)
         {
             MouseState ms = Mouse.GetState();
-            mouseTracker().Update(ms);
+            MouseTracker().Update(ms);
 
             UpdateSize();
 
@@ -52,7 +52,7 @@ namespace forgotten.Desktop
             else if (wasHovered)
                 hoverCallback(false);
 
-            if (isHovered && mouseTracker().WasPressed())
+            if (isHovered && MouseTracker().WasPressed())
             {
                 clickCallback();
             }

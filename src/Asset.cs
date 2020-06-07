@@ -56,7 +56,7 @@ namespace forgotten.Desktop
             }
         }
 
-        protected MouseTracker mouseTracker()
+        protected MouseTracker MouseTracker()
         {
             if (_mouseTracker == null)
             {

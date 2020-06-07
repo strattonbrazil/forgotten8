@@ -8,18 +8,20 @@ namespace forgotten.Desktop
 {
     public class AnimatedAsset : Asset
     {
+        public Vector2 Size;
         private Texture2D[] textures;
         private int numFrames;
         private int currFrame;
         private float animDelay;
         private float lastElapsed; // time passed since last frame update
 
-        public int Height()
+        // TODO: get rid of these?
+        public int TexHeight()
         {
             return textures[0].Height;
         }
 
-        public int Width()
+        public int TexWidth()
         {
             return textures[0].Width;
         }
@@ -53,17 +55,20 @@ namespace forgotten.Desktop
 
                 textures[fileIndex-1] = Game().Content.Load<Texture2D>(baseDir + "/" + key);
             }
+
+            Size = new Vector2(textures[0].Width, textures[0].Height);
         }
 
         public override void Draw(Vector2 targetSize)
         {
+            Vector2 scale = Size / new Vector2(TexWidth(), TexHeight());
             GameSpriteBatch().Draw(textures[currFrame],
                                    AbsolutePosition(),
                                    null, // source rect
                                    Color.White,
                                    0,
                                    Vector2.Zero,
-                                   Vector2.One,
+                                   scale,
                                    SpriteEffects.None,
                                    0);
         }

@@ -50,7 +50,8 @@ namespace forgotten.Desktop
             this.IsMouseVisible = true;
             this.Window.AllowUserResizing = true;
 
-            PaneStack.Instance.Push(new GalaxyPane());
+            //PaneStack.Instance.Push(new GalaxyPane());
+            PaneStack.Instance.Push(new BattlePane());
         }
 
         /// <summary>

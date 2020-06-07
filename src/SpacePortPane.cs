@@ -31,9 +31,9 @@ namespace forgotten.Desktop
         public override void Update(Vector2 targetSize, GameTime gameTime)
         {
             MouseState ms = Mouse.GetState();
-            mouseTracker().Update(ms);
+            MouseTracker().Update(ms);
 
-            if (mouseTracker().WasPressed())
+            if (MouseTracker().WasPressed())
             {
                 if (spacePort.IsPartHovered("cinema"))
                 {

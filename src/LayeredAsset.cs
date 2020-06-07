@@ -150,7 +150,7 @@ namespace forgotten.Desktop
         public override void Update(Vector2 targetSize, GameTime gameTime)
         {
             MouseState ms = Mouse.GetState();
-            mouseTracker().Update(ms);
+            MouseTracker().Update(ms);
 
             Vector2 origin = AbsolutePosition();
             foreach (Tuple<string, LayeredPartInfo> part in partTextures)
