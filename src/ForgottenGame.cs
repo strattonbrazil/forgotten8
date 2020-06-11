@@ -18,6 +18,8 @@ namespace forgotten.Desktop
 
         public static ForgottenGame GlobalRef;
 
+        private RenderTarget2D renderTarget;
+
         public ForgottenGame()
         {
             // store for quick access
@@ -113,6 +115,39 @@ namespace forgotten.Desktop
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
+            if (renderTarget == null || renderTarget.Width != GraphicsDevice.PresentationParameters.BackBufferWidth * 2)
+            {
+                renderTarget = new RenderTarget2D(GraphicsDevice, GraphicsDevice.PresentationParameters.BackBufferWidth * 2, GraphicsDevice.PresentationParameters.BackBufferHeight * 2);
+            }
+
+            GraphicsDevice.SetRenderTarget(renderTarget);
+            DrawScene();
+            GraphicsDevice.SetRenderTarget(null);
+
+            //spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+            //spriteBatch.Draw((Texture2D)lastTarget, Vector2.Zero, Color.White * 0.4f);
+            //spriteBatch.End();
+
+            Vector2 invScale = new Vector2((float)GraphicsDevice.PresentationParameters.BackBufferWidth / renderTarget.Width,
+                                           (float)GraphicsDevice.PresentationParameters.BackBufferHeight / renderTarget.Height);
+
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Opaque, SamplerState.LinearClamp);
+            spriteBatch.Draw((Texture2D)renderTarget, 
+                             Vector2.Zero, 
+                             null, // source rect
+                             Color.White,
+                             0,
+                             Vector2.Zero,
+                             invScale,
+                             SpriteEffects.None,
+                             0);
+            spriteBatch.End();
+
+            base.Draw(gameTime);
+        }
+
+        private void DrawScene()
+        {
             GraphicsDevice.Clear(Color.Black);
 
             Viewport viewport = graphics.GraphicsDevice.Viewport;
@@ -130,11 +165,10 @@ namespace forgotten.Desktop
                                  targetSize,
                                  SpriteEffects.None,
                                  0);
-                                 
+
                 pane.DrawTree(targetSize);
                 spriteBatch.End();
             }
-            base.Draw(gameTime);
         }
     }
 }

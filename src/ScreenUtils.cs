@@ -37,5 +37,10 @@ namespace forgotten.Desktop
             float worldY = (screenP.Y / (screenH - padding * 2) - padding) * worldH - worldH * 0.5f;
             return new Vector2(worldX, worldY);
         }
+
+        public float ScaleToScreen(float w)
+        {
+            return (screenH - 2 * padding) * (w / worldH);
+        }
     }
 }
