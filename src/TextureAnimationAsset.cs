@@ -15,6 +15,8 @@ namespace forgotten.Desktop
         Vector2 halfSpriteSize;
         int spriteIndex = 0;
         float animStart = -1;
+        public Vector2 Acceleration;
+        public Vector2 Velocity;
 
         public TextureAnimationAsset(Texture2D texture, int rows, int columns)
         {
@@ -53,6 +55,11 @@ namespace forgotten.Desktop
                 animStart = totalSeconds;
 
             spriteIndex = (int)(20 * (totalSeconds - animStart));
+        }
+
+        public bool IsFinished()
+        {
+            return spriteIndex >= rows * columns;
         }
     }
 }

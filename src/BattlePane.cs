@@ -114,16 +114,17 @@ namespace forgotten.Desktop
                 friendlyLasers.Add(laser);
             }
 
-            float elapsed = (float)gameTime.TotalGameTime.TotalSeconds;
+            float totalTime = (float)gameTime.TotalGameTime.TotalSeconds;
+            float elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            enemyRegion.Position = new Vector2(0.1f * (float)Math.Sin(elapsed * 1.5f), -0.6f + 0.02f * (float)Math.Cos(elapsed * 0.5f));
+            enemyRegion.Position = new Vector2(0.1f * (float)Math.Sin(totalTime * 1.5f), -0.6f + 0.02f * (float)Math.Cos(totalTime * 0.5f));
             //enemyPosW = new Vector2(0.1f * (float)Math.Sin(elapsed * 1.5f), -0.6f + 0.02f * (float)Math.Cos(elapsed * 0.5f));
-            shipPosW = new Vector2(0.1f * (float)Math.Sin(elapsed), 0.6f + 0.02f * (float)Math.Cos(elapsed * 0.5f));
+            shipPosW = new Vector2(0.1f * (float)Math.Sin(totalTime), 0.6f + 0.02f * (float)Math.Cos(totalTime * 0.5f));
 
             for (int i = 0; i < NUM_STREAKS; i++)
             {
                 float speed = 2 + (i % 4);
-                float x = -aspect + (float)Math.Cos(i) + speed*elapsed; //20 + 50 * (float)Math.Cos(i);
+                float x = -aspect + (float)Math.Cos(i) + speed*totalTime; //20 + 50 * (float)Math.Cos(i);
                 int screenWidths = (int)(x / (2 * aspect));
                 x = x - screenWidths * (2 * aspect) - aspect;
 
@@ -143,9 +144,9 @@ namespace forgotten.Desktop
 
                 if (impactPos != null)
                 {
-                    Console.WriteLine(impactPos);
                     var explosion = new TextureAnimationAsset(explosionTexture, 3, 5);
                     explosion.Position = su.WorldToScreen(impactPos.Value);
+                    explosion.Acceleration = new Vector2(1, 0);
                     AddChild("explosion_effect", explosion);
                 } else if (laser.Pos.Length() < 10)
                 {
@@ -154,6 +155,29 @@ namespace forgotten.Desktop
                 laser.Pos = laser.Pos + laser.Dir * laser.Speed;
             }
             friendlyLasers = unimpactedLasers;
+
+            foreach (KeyValuePair<string,Asset> pair in children)
+            {
+                if (typeof(TextureAnimationAsset).IsInstanceOfType(pair.Value))
+                {
+                    TextureAnimationAsset asset = (TextureAnimationAsset)pair.Value;
+                    asset.Velocity = asset.Acceleration * elapsedTime;
+                    asset.Position += su.ScaleToScreen(asset.Velocity);
+                }
+            }
+
+            bool isNotFinishedExplosion(Asset asset)
+            {
+                if (typeof(TextureAnimationAsset).IsInstanceOfType(asset))
+                {
+                    TextureAnimationAsset anim = (TextureAnimationAsset)asset;
+                    return !anim.IsFinished();
+                }
+
+                return true;
+            }
+
+            children = children.FindAll(pair => isNotFinishedExplosion(pair.Value));
         }
 
         class Laser

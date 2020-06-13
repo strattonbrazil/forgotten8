@@ -42,5 +42,10 @@ namespace forgotten.Desktop
         {
             return (screenH - 2 * padding) * (w / worldH);
         }
+
+        public Vector2 ScaleToScreen(Vector2 v)
+        {
+            return new Vector2(ScaleToScreen(v.X), ScaleToScreen(v.Y));
+        }
     }
 }
