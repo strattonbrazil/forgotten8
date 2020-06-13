@@ -86,6 +86,13 @@ namespace forgotten.Desktop
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            // NOTE: its weird to do this in Update() as opposed to Draw(), but putting it here
+            // so the targetsize between Update() and Draw() are the same
+            if (renderTarget == null || renderTarget.Width != GraphicsDevice.PresentationParameters.BackBufferWidth * 2)
+            {
+                renderTarget = new RenderTarget2D(GraphicsDevice, GraphicsDevice.PresentationParameters.BackBufferWidth * 2, GraphicsDevice.PresentationParameters.BackBufferHeight * 2);
+            }
+
 
             if (!escapeWasDown && Keyboard.GetState().IsKeyDown(Keys.Escape))
             {
@@ -96,9 +103,7 @@ namespace forgotten.Desktop
             }
             escapeWasDown = Keyboard.GetState().IsKeyDown(Keys.Escape);
 
-
-            Viewport viewport = graphics.GraphicsDevice.Viewport;
-            Vector2 targetSize = new Vector2(viewport.Width, viewport.Height);
+            Vector2 targetSize = new Vector2(renderTarget.Width, renderTarget.Height);
 
             List<Pane> currentPanes = new List<Pane>(PaneStack.Instance.panes);
             foreach (Pane pane in currentPanes)
@@ -109,24 +114,22 @@ namespace forgotten.Desktop
             base.Update(gameTime);
         }
 
+        public Vector2 MouseScale()
+        {
+            return new Vector2(renderTarget.Width / (float)GraphicsDevice.PresentationParameters.BackBufferWidth,
+                               renderTarget.Height / (float)GraphicsDevice.PresentationParameters.BackBufferHeight);
+        }
+
         /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            if (renderTarget == null || renderTarget.Width != GraphicsDevice.PresentationParameters.BackBufferWidth * 2)
-            {
-                renderTarget = new RenderTarget2D(GraphicsDevice, GraphicsDevice.PresentationParameters.BackBufferWidth * 2, GraphicsDevice.PresentationParameters.BackBufferHeight * 2);
-            }
 
             GraphicsDevice.SetRenderTarget(renderTarget);
             DrawScene();
             GraphicsDevice.SetRenderTarget(null);
-
-            //spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
-            //spriteBatch.Draw((Texture2D)lastTarget, Vector2.Zero, Color.White * 0.4f);
-            //spriteBatch.End();
 
             Vector2 invScale = new Vector2((float)GraphicsDevice.PresentationParameters.BackBufferWidth / renderTarget.Width,
                                            (float)GraphicsDevice.PresentationParameters.BackBufferHeight / renderTarget.Height);

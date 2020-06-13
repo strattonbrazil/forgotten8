@@ -38,15 +38,15 @@ namespace forgotten.Desktop
 
         public override void Update(Vector2 targetSize, GameTime gameTime)
         {
-            MouseState ms = Mouse.GetState();
-            MouseTracker().Update(ms);
+            MouseTracker().Update();
 
             UpdateSize();
 
             var pos = AbsolutePosition();
             Rectangle buttonRect = new Rectangle((int)pos.X, (int)pos.Y, (int)Size.X, (int)Size.Y);
             bool wasHovered = isHovered;
-            isHovered = buttonRect.Contains(ms.X, ms.Y);
+            Point cursorP = MouseTracker().Position;
+            isHovered = buttonRect.Contains(cursorP.X, cursorP.Y);
             if (isHovered)
                 hoverCallback(true);
             else if (wasHovered)

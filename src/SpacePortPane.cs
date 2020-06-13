@@ -30,8 +30,7 @@ namespace forgotten.Desktop
 
         public override void Update(Vector2 targetSize, GameTime gameTime)
         {
-            MouseState ms = Mouse.GetState();
-            MouseTracker().Update(ms);
+            MouseTracker().Update();
 
             if (MouseTracker().WasPressed())
             {

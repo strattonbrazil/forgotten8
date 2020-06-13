@@ -149,15 +149,14 @@ namespace forgotten.Desktop
 
         public override void Update(Vector2 targetSize, GameTime gameTime)
         {
-            MouseState ms = Mouse.GetState();
-            MouseTracker().Update(ms);
+            MouseTracker().Update();
 
             Vector2 origin = AbsolutePosition();
             foreach (Tuple<string, LayeredPartInfo> part in partTextures)
             {
                 LayeredPartInfo partInfo = part.Item2;
                 Rectangle screenRect = new Rectangle((int)(origin.X + partInfo.dstX), (int)(origin.Y + partInfo.dstY), partInfo.subwidth, partInfo.subheight);
-                partInfo.MouseHovering = screenRect.Contains(ms.Position);
+                partInfo.MouseHovering = screenRect.Contains(MouseTracker().Position);
             }
 
             float elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;

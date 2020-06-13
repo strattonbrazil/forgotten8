@@ -209,9 +209,8 @@ namespace forgotten.Desktop
 
         public override void Update(Vector2 targetSize, GameTime gameTime)
         {
-            MouseState ms = Mouse.GetState();
-            MouseTracker().Update(ms);
-            hoverSystem = GetSystem(targetSize, ms.Position);
+            MouseTracker().Update();
+            hoverSystem = GetSystem(targetSize, MouseTracker().Position);
 
             if (hoverSystem != null && currentSystem != null && !traveling) // not traveling yet
             {
