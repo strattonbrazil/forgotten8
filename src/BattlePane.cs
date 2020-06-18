@@ -14,6 +14,8 @@ namespace forgotten.Desktop
         Texture2D enemy;
         SampledRegion enemyRegion;
         Vector2 shipPosW;
+        Vector2 turretPosW;
+        float turretRotation = (float)Math.PI;
         //Vector2 enemyPosW;
         const int NUM_STREAKS = 150;
         Streak[] streaks;
@@ -21,11 +23,14 @@ namespace forgotten.Desktop
         List<Laser> friendlyLasers = new List<Laser>();
 
         Texture2D explosionTexture;
+        Texture2D turret;
 
         public BattlePane()
         {
             battleship = Game().Content.Load<Texture2D>("spaceship_battle");
             enemy = Game().Content.Load<Texture2D>("enemyship_battle");
+            turret = Game().Content.Load<Texture2D>("turret");
+
             streaks = new Streak[NUM_STREAKS];
 
             float enemyAspect = (float)enemy.Width / enemy.Height;
@@ -84,6 +89,22 @@ namespace forgotten.Desktop
                                        invScale,
                                        SpriteEffects.None,
                                        0);
+
+
+                float desiredSize2 = su.ScaleToScreen(shipWorldSize * 0.5f);
+                float invScale2 = desiredSize2 / (float)turret.Height;
+                Vector2 turretScreenSize = new Vector2(invScale2 * turret.Width, invScale2 * turret.Height);
+                Vector2 turretPos = su.WorldToScreen(turretPosW);
+
+                GameSpriteBatch().Draw(turret,
+                                       turretPos,
+                                       null, // source rect
+                                       Color.White,
+                                       turretRotation,
+                                       0.5f * new Vector2(turret.Width, turret.Height),
+                                       invScale2,
+                                       SpriteEffects.None,
+                                       0);
             }
 
             foreach (Laser laser in friendlyLasers)
@@ -93,22 +114,37 @@ namespace forgotten.Desktop
 
                 DrawColoredLine(laserPos, laserTailPos, Color.Red, 4);
             }
+
+            float lineHeight = NormalFont().MeasureString("X").Y;
+            GameSpriteBatch().DrawString(NormalFont(), "Lasers", new Vector2(20, targetSize.Y - lineHeight * 4), Color.White);
+            GameSpriteBatch().DrawString(NormalFont(), "Shields", new Vector2(20, targetSize.Y - lineHeight * 3), Color.White);
+            GameSpriteBatch().DrawString(NormalFont(), "Engine", new Vector2(20, targetSize.Y - lineHeight * 2), Color.White);
         }
+
+
 
         public override void Update(Vector2 targetSize, GameTime gameTime)
         {
             float aspect = targetSize.X / (float)targetSize.Y;
             ScreenUtils su = new ScreenUtils(targetSize, new Vector2(aspect * 2, 2), 0);
 
-//            MouseState ms = Mouse.GetState();
-//            Point p = ms.Position;
+
+            Vector2 d = su.ScreenToWorld(MouseTracker().Position) - turretPosW;
+            float dstTurretRotation = (float)(-Math.Atan2(-d.Y, d.X)) + (float)Math.PI * 1.5f;
+
+            // NOTE: this code sucks, but I'm tired
+            if (turretRotation < dstTurretRotation)
+                turretRotation += 0.01f;
+            else
+                turretRotation -= 0.01f;
+
             MouseTracker().Update();
             if (MouseTracker().WasPressed())
             {
-                Vector2 target = su.ScreenToWorld(MouseTracker().Position);
+                //Vector2 target = su.ScreenToWorld(MouseTracker().Position);
                 Laser laser = new Laser();
-                laser.Pos = new Vector2(0, 0);
-                laser.Dir = Vector2.Normalize(target - laser.Pos);
+                laser.Pos = turretPosW;
+                laser.Dir = new Vector2(-(float)Math.Sin(turretRotation), (float)Math.Cos(turretRotation));   //Vector2.Normalize(target - laser.Pos);
                 laser.Length = 0.1f;
                 laser.Speed = 0.05f;
                 friendlyLasers.Add(laser);
@@ -117,9 +153,9 @@ namespace forgotten.Desktop
             float totalTime = (float)gameTime.TotalGameTime.TotalSeconds;
             float elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            enemyRegion.Position = new Vector2(0.1f * (float)Math.Sin(totalTime * 1.5f), -0.6f + 0.02f * (float)Math.Cos(totalTime * 0.5f));
-            //enemyPosW = new Vector2(0.1f * (float)Math.Sin(elapsed * 1.5f), -0.6f + 0.02f * (float)Math.Cos(elapsed * 0.5f));
-            shipPosW = new Vector2(0.1f * (float)Math.Sin(totalTime), 0.6f + 0.02f * (float)Math.Cos(totalTime * 0.5f));
+            enemyRegion.Position = new Vector2(0.4f * (float)Math.Sin(totalTime * 1.5f), -0.6f + 0.02f * (float)Math.Cos(totalTime * 0.5f));
+            shipPosW = new Vector2(0.2f * (float)Math.Sin(totalTime), 0.6f + 0.02f * (float)Math.Cos(totalTime * 0.5f));
+            turretPosW = shipPosW + new Vector2(0.26f, 0.0f);
 
             for (int i = 0; i < NUM_STREAKS; i++)
             {
