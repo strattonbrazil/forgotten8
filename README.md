@@ -5,6 +5,7 @@
 * make drawn lines centered on rotation point
 * fix starting tail on lasers
 * consider having auto-remove function on Asset
+* destroy boarding party ship on several collisions
 
 === ImageMagick reference
 convert in.gif -layers Coalesce -resize 980x725 -layers Optimize out.gif

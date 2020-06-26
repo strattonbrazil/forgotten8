@@ -9,18 +9,31 @@ namespace forgotten.Desktop
 {
     public class BattlePane : Pane
     {
+        enum BoardingState
+        {
+            PREPARED, BOARDING, DESTROYED
+        }
+
         AnimatedAsset alien;
         Texture2D battleship;
         Texture2D enemy;
+        Texture2D boardingShip;
         SampledRegion enemyRegion;
+        SampledRegion boardingRegion;
         Vector2 shipPosW;
         Vector2 turretPosW;
         float turretRotation = (float)Math.PI;
-        //Vector2 enemyPosW;
         const int NUM_STREAKS = 150;
         Streak[] streaks;
 
         List<Laser> friendlyLasers = new List<Laser>();
+
+        int maxLasers = 4;
+        float laserBuffer = 3.2f;
+        int boardingHealth = 4;
+
+        BoardingState boardingState = BoardingState.PREPARED;
+        //bool boardingAttack = PREPARED;
 
         Texture2D explosionTexture;
         Texture2D turret;
@@ -30,11 +43,15 @@ namespace forgotten.Desktop
             battleship = Game().Content.Load<Texture2D>("spaceship_battle");
             enemy = Game().Content.Load<Texture2D>("enemyship_battle");
             turret = Game().Content.Load<Texture2D>("turret");
+            boardingShip = Game().Content.Load<Texture2D>("boarding_ship");
 
             streaks = new Streak[NUM_STREAKS];
 
             float enemyAspect = (float)enemy.Width / enemy.Height;
             enemyRegion = new SampledRegion(enemy, enemyAspect * 0.5f, 0.5f);
+
+            float boardingAspect = (float)boardingShip.Width / boardingShip.Height;
+            boardingRegion = new SampledRegion(boardingShip, boardingAspect * 0.25f, 0.25f);
 
             explosionTexture = Game().Content.Load<Texture2D>("explosion_spritesheet");
         }
@@ -43,7 +60,7 @@ namespace forgotten.Desktop
         {
             float aspect = targetSize.X / (float)targetSize.Y;
             ScreenUtils su = new ScreenUtils(targetSize, new Vector2(aspect * 2, 2), 0);
-            
+
             DrawColoredRect(new Vector2(0, 0),
                             targetSize,
                             Color.Black);
@@ -55,6 +72,23 @@ namespace forgotten.Desktop
                                 Color.White);
             }
 
+            {
+                float desiredHeight = su.ScaleToScreen(boardingRegion.Height);
+                Vector2 textureSize = new Vector2(boardingShip.Width, boardingShip.Height);
+                Vector2 invScale = new Vector2(su.ScaleToScreen(boardingRegion.Width), su.ScaleToScreen(boardingRegion.Height)) / textureSize;
+                Vector2 shipScreenSize = invScale * textureSize;
+                Vector2 shipPos = su.WorldToScreen(boardingRegion.Position);
+
+                GameSpriteBatch().Draw(boardingShip,
+                                       shipPos - 0.5f * shipScreenSize,
+                                       null, // source rect
+                                       Color.White,
+                                       0,
+                                       Vector2.Zero,
+                                       invScale,
+                                       SpriteEffects.None,
+                                       0);
+            }
             {
                 float desiredHeight = su.ScaleToScreen(enemyRegion.Height);
                 Vector2 textureSize = new Vector2(enemy.Width, enemy.Height);
@@ -115,31 +149,43 @@ namespace forgotten.Desktop
                 DrawColoredLine(laserPos, laserTailPos, Color.Red, 4);
             }
 
-            float lineHeight = NormalFont().MeasureString("X").Y;
-            GameSpriteBatch().DrawString(NormalFont(), "Lasers", new Vector2(20, targetSize.Y - lineHeight * 4), Color.White);
-            GameSpriteBatch().DrawString(NormalFont(), "Shields", new Vector2(20, targetSize.Y - lineHeight * 3), Color.White);
-            GameSpriteBatch().DrawString(NormalFont(), "Engine", new Vector2(20, targetSize.Y - lineHeight * 2), Color.White);
+
+            int fullChargeWidth = 80;
+            int chargePadding = 4;
+            Vector2 bufferOrigin = new Vector2(targetSize.X * 0.5f, targetSize.Y - 100);
+            //int maxLasers = 4;
+            //float laserBuffer = 0;
+            for (int i = 0; i < maxLasers; i++)
+            {
+                float chargeWidth = (float)Math.Min(1.0f, laserBuffer - i) * fullChargeWidth;
+                DrawColoredRect(bufferOrigin + new Vector2((fullChargeWidth + chargePadding) * i, 0), new Vector2(fullChargeWidth, 20), Color.Orange);
+                DrawColoredRect(bufferOrigin + new Vector2((fullChargeWidth + chargePadding) * i, 0), new Vector2(chargeWidth, 20), Color.Red);
+            }
         }
-
-
 
         public override void Update(Vector2 targetSize, GameTime gameTime)
         {
             float aspect = targetSize.X / (float)targetSize.Y;
             ScreenUtils su = new ScreenUtils(targetSize, new Vector2(aspect * 2, 2), 0);
 
+            Vector2 turretD = su.ScreenToWorld(MouseTracker().Position) - turretPosW;
+            float dstTurretRotation = (float)(-Math.Atan2(-turretD.Y, turretD.X)) + (float)Math.PI * 1.5f;
 
-            Vector2 d = su.ScreenToWorld(MouseTracker().Position) - turretPosW;
-            float dstTurretRotation = (float)(-Math.Atan2(-d.Y, d.X)) + (float)Math.PI * 1.5f;
+            float totalTime = (float)gameTime.TotalGameTime.TotalSeconds;
+            float elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            //laserBuffer = laserBuffer + gameTime.
 
             // NOTE: this code sucks, but I'm tired
             if (turretRotation < dstTurretRotation)
-                turretRotation += 0.01f;
+                turretRotation += 0.5f * elapsedTime;
             else
-                turretRotation -= 0.01f;
+                turretRotation -= 0.5f * elapsedTime;
+
+            laserBuffer = Math.Min(laserBuffer + elapsedTime * 0.5f, maxLasers);
 
             MouseTracker().Update();
-            if (MouseTracker().WasPressed())
+            if (MouseTracker().WasPressed() && laserBuffer >= 1)
             {
                 //Vector2 target = su.ScreenToWorld(MouseTracker().Position);
                 Laser laser = new Laser();
@@ -148,12 +194,33 @@ namespace forgotten.Desktop
                 laser.Length = 0.1f;
                 laser.Speed = 0.05f;
                 friendlyLasers.Add(laser);
+
+                laserBuffer -= 1;
+
+                if (boardingState == BoardingState.PREPARED)
+                    boardingState = BoardingState.BOARDING;
             }
 
-            float totalTime = (float)gameTime.TotalGameTime.TotalSeconds;
-            float elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-
             enemyRegion.Position = new Vector2(0.4f * (float)Math.Sin(totalTime * 1.5f), -0.6f + 0.02f * (float)Math.Cos(totalTime * 0.5f));
+
+            if (boardingState == BoardingState.PREPARED)
+                boardingRegion.Position = enemyRegion.Position;
+            else if (boardingState == BoardingState.BOARDING)
+            {
+                Vector2 d = shipPosW - boardingRegion.Position;
+                d.Normalize();
+                boardingRegion.Position += d * 0.1f * elapsedTime;
+            } else if (boardingState == BoardingState.DESTROYED)
+            {
+                // TODO: animate this, use acceleration
+                boardingRegion.Acceleration = new Vector2(1, 0);
+                boardingRegion.Velocity = boardingRegion.Acceleration * elapsedTime;
+                boardingRegion.Position += boardingRegion.Velocity;
+
+                //asset.Velocity = asset.Acceleration * elapsedTime;
+                //asset.Position += su.ScaleToScreen(asset.Velocity);
+            }
+
             shipPosW = new Vector2(0.2f * (float)Math.Sin(totalTime), 0.6f + 0.02f * (float)Math.Cos(totalTime * 0.5f));
             turretPosW = shipPosW + new Vector2(0.26f, 0.0f);
 
@@ -176,12 +243,26 @@ namespace forgotten.Desktop
             {
                 Vector2 prevPos = laser.Pos;
                 Vector2 newPos = laser.Pos + laser.Dir * laser.Speed;
-                Vector2? impactPos = enemyRegion.Trace(prevPos, newPos);
+                Vector2? enemyImpactPos = enemyRegion.Trace(prevPos, newPos);
+                Vector2? boardingImpactPos = boardingRegion.Trace(prevPos, newPos);
+                float boardingDistance = shipPosW.Y - boardingRegion.Position.Y;
 
-                if (impactPos != null)
+                if (boardingState == BoardingState.BOARDING && boardingImpactPos != null && boardingDistance > 0.15f)
                 {
                     var explosion = new TextureAnimationAsset(explosionTexture, 3, 5);
-                    explosion.Position = su.WorldToScreen(impactPos.Value);
+                    explosion.Position = su.WorldToScreen(boardingImpactPos.Value);
+                    explosion.Acceleration = new Vector2(1, 0);
+                    AddChild("explosion_effect", explosion);
+                    boardingHealth--;
+                    if (boardingHealth == 0)
+                    {
+                        boardingState = BoardingState.DESTROYED;
+                    }
+                }
+                else if (enemyImpactPos != null)
+                {
+                    var explosion = new TextureAnimationAsset(explosionTexture, 3, 5);
+                    explosion.Position = su.WorldToScreen(enemyImpactPos.Value);
                     explosion.Acceleration = new Vector2(1, 0);
                     AddChild("explosion_effect", explosion);
                 } else if (laser.Pos.Length() < 10)
@@ -240,6 +321,8 @@ namespace forgotten.Desktop
         public float Width;
         public float Height;
         public Vector2 Position;
+        public Vector2 Acceleration;
+        public Vector2 Velocity;
         private readonly int verticalSamples = 30;
         private readonly int horizontalSamples;
 
