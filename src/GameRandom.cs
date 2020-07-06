@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+
 namespace forgotten.Desktop
 {
     public class GameRandom : Random
@@ -14,6 +16,11 @@ namespace forgotten.Desktop
         public T Choose<T>(T[] array)
         {
             return array[rnd.Next(array.Length)];
+        }
+
+        public T Choose<T>(List<T> list)
+        {
+            return list[rnd.Next(list.Count)];
         }
 
         public float NextFloat()

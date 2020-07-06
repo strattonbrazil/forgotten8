@@ -53,7 +53,8 @@ namespace forgotten.Desktop
             this.Window.AllowUserResizing = true;
 
             //PaneStack.Instance.Push(new GalaxyPane());
-            PaneStack.Instance.Push(new BattlePane());
+            //PaneStack.Instance.Push(new BattlePane());
+            PaneStack.Instance.Push(new BoardingPane());
         }
 
         /// <summary>
