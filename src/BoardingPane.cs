@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace forgotten.Desktop
 {
     public class BoardingPane : Pane
     {
+        private Texture2D boarderTexture;
+
         private const string ASCII_LAYOUT = @"""
 OOOOOOOOOOOOO
 OBBBOBBBBBOBO
 OBOOOBOOOOOOO
+BBBBBBBBBBBBB
 OOOBOOOBBOBBO
 OBOBBBBBBOBBO
 OBOBBBOOOOOOO
@@ -30,7 +34,7 @@ OOOOOOOOOOOOO
         public BoardingPane()
         {
             List<string> lines = new List<string>(ASCII_LAYOUT.Split('\n'));
-            lines = lines.FindAll(line => line.Contains("O"));
+            lines = lines.FindAll(line => line.Contains("O") || line.Contains("B"));
             numRows = lines.Count;
             numColumns = lines[0].Trim().Length;
             cells = new Cell[lines.Count, numColumns];
@@ -52,6 +56,8 @@ OOOOOOOOOOOOO
                 boarders[i].path.Add(cells[0, 3 + i]);
                 boarders[i].progress = 0.0f;
             }
+
+            boarderTexture = Game().Content.Load<Texture2D>("boarder");
         }
 
         public override void Draw(Vector2 targetSize)
@@ -59,8 +65,8 @@ OOOOOOOOOOOOO
             Vector2 origin = new Vector2(30, 30);
             Vector2 cellSize = new Vector2(64, 64);
             Vector2 halfCellSize = cellSize * 0.5f;
-            Vector2 boarderSize = new Vector2(32, 32);
-            Vector2 halfBoarderSize = boarderSize * 0.5f;
+            //Vector2 boarderSize = new Vector2(32, 32);
+            //Vector2 halfBoarderSize = boarderSize * 0.5f;
             for (int row = 0; row < numRows; row++)
             {
                 for (int column = 0; column < numColumns; column++)
@@ -73,84 +79,113 @@ OOOOOOOOOOOOO
 
             foreach (Boarder boarder in boarders)
             {
+                int boarderSize = 32;
+                Vector2 halfBoarderSize = new Vector2(0.5f * boarderSize, 0.5f * boarderSize);
+
                 Cell srcCell = boarder.path[0];
-                Vector2 pos = origin + cellSize * new Vector2(srcCell.column, srcCell.row) + halfCellSize - halfBoarderSize;
+                Vector2 pos = origin + cellSize * new Vector2(srcCell.column, srcCell.row) + halfCellSize;// - halfBoarderSize;
                 if (boarder.path.Count > 1)
                 {
                     Cell dstCell = boarder.path[1];
-                    Vector2 dstPos = origin + cellSize * new Vector2(dstCell.column, dstCell.row) + halfCellSize - halfBoarderSize;
+                    Vector2 dstPos = origin + cellSize * new Vector2(dstCell.column, dstCell.row) + halfCellSize;// - halfBoarderSize;
                     pos = pos * (1 - boarder.progress) + dstPos * boarder.progress;
                 }
-                DrawColoredRect(pos, boarderSize, Color.Crimson);
+
+                Vector2 texToScreen = new Vector2((float)boarderSize / boarderTexture.Width, (float)boarderSize / boarderTexture.Height);
+                GameSpriteBatch().Draw(boarderTexture,
+                                       pos,
+                                       null, // source rect
+                                       Color.White,
+                                       0,
+                                       0.5f * new Vector2(boarderTexture.Width, boarderTexture.Height),//halfBoarderSize,// Vector2.Zero,
+                                       texToScreen,
+                                       SpriteEffects.None,
+                                       0);
             }
         }
 
         public override void Update(Vector2 targetSize, GameTime gameTime)
         {
-            foreach (Boarder boarder in boarders)
+            HashSet<Boarder> toUpdate = new HashSet<Boarder>(boarders);
+            while (toUpdate.Count > 0)
             {
-                if (boarder.path.Count > 1)
+                // silly pop
+                Boarder boarder = null;
+                foreach (Boarder b in toUpdate)
                 {
-                    if (boarder.progress > 1)
-                    {
-                        boarder.path.RemoveAt(0);
-                        boarder.progress = 0;
-                    }
-                    else
-                    {
-                        boarder.progress += 10 * (float)gameTime.ElapsedGameTime.TotalSeconds;
-                    }
+                    boarder = b;
+                    toUpdate.Remove(b);
+                    break;
                 }
-                else // build path
+
+                BuildCellPath(boarder.path, 20);
+
+                if (boarder.progress > 1)
                 {
+                    boarder.path.RemoveAt(0);
+                    boarder.progress = 0;
+                }
+                else
+                {
+                    // if someone else going to my next spot, don't
                     Cell srcCell = boarder.path[0];
-                    Tree tree = new Tree(srcCell);
-                    BuildCellTree(tree, null, 10);
-
-
-                    while (tree != null && tree.branches.Count > 0)
+                    Cell dstCell = boarder.path[1];
+                    bool wait = false;
+                    foreach (Boarder other in boarders)
                     {
-                        tree = GameRandom.Instance.Choose(tree.branches);
-                        boarder.path.Add(tree.cell);
+                        if (boarder == other)
+                            continue;
+                        if (other.path.Count > 1 && other.path[1] == boarder.path[1] && other.progress > boarder.progress)
+                            wait = true;
+                    }
+                    if (!wait)
+                    {
+                        boarder.progress += 1 * (float)gameTime.ElapsedGameTime.TotalSeconds;
                     }
                 }
             }
         }
 
-        private void BuildCellTree(Tree tree, Tree parent, int depth=3)
+        private void BuildCellPath(List<Cell> path, int depth=3)
         {
             if (depth == 0)
                 return;
 
-            Cell c = tree.cell;
+            List<Cell> possibleBranches = new List<Cell>();
 
-            Cell leftCell = c.column > 0 ? cells[c.row, c.column - 1] : null;
-            if (leftCell != null && !leftCell.blocked && (parent == null || leftCell != parent.cell))
+            Cell cell = path[path.Count - 1];
+            Cell parent = null;
+            if (path.Count > 1)
+                parent = path[path.Count - 2];
+
+            Cell leftCell = cell.column > 0 ? cells[cell.row, cell.column - 1] : null;
+            if (leftCell != null && !leftCell.blocked && (parent == null || leftCell != parent))
             {
-                tree.branches.Add(new Tree(leftCell));
+                possibleBranches.Add(leftCell);
             }
 
-            Cell upCell = c.row > 0 ? cells[c.row - 1, c.column] : null;
-            if (upCell != null && !upCell.blocked && (parent == null || upCell != parent.cell))
+            Cell upCell = cell.row > 0 ? cells[cell.row - 1, cell.column] : null;
+            if (upCell != null && !upCell.blocked && (parent == null || upCell != parent))
             {
-                tree.branches.Add(new Tree(upCell));
+                possibleBranches.Add(upCell);
             }
 
-            Cell rightCell = c.column < numColumns - 1 ? cells[c.row, c.column + 1] : null;
-            if (rightCell != null && !rightCell.blocked && (parent == null || rightCell != parent.cell))
+            Cell rightCell = cell.column < numColumns - 1 ? cells[cell.row, cell.column + 1] : null;
+            if (rightCell != null && !rightCell.blocked && (parent == null || rightCell != parent))
             {
-                tree.branches.Add(new Tree(rightCell));
+                possibleBranches.Add(rightCell);
             }
 
-            Cell downCell = c.row < numRows - 1 ? cells[c.row + 1, c.column] : null;
-            if (downCell != null && !downCell.blocked && (parent == null || downCell != parent.cell))
+            Cell downCell = cell.row < numRows - 1 ? cells[cell.row + 1, cell.column] : null;
+            if (downCell != null && !downCell.blocked && (parent == null || downCell != parent))
             {
-                tree.branches.Add(new Tree(downCell));
+                possibleBranches.Add(downCell);
             }
 
-            foreach (Tree b in tree.branches)
+            if (possibleBranches.Count > 0)
             {
-                BuildCellTree(b, tree, depth - 1);
+                path.Add(GameRandom.Instance.Choose(possibleBranches));
+                BuildCellPath(path, depth - 1);
             }
         }
 
@@ -173,16 +208,6 @@ OOOOOOOOOOOOO
             public List<Cell> path = new List<Cell>();
             //public Cell src, dst;
             public float progress = 0;
-        }
-
-        public class Tree
-        {
-            public readonly Cell cell;
-            public List<Tree> branches = new List<Tree>();
-            public Tree(Cell cell)
-            {
-                this.cell = cell;
-            }
         }
     }
 }
