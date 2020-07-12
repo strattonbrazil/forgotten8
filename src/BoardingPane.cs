@@ -13,7 +13,6 @@ namespace forgotten.Desktop
 OOOOOOOOOOOOO
 OBBBOBBBBBOBO
 OBOOOBOOOOOOO
-BBBBBBBBBBBBB
 OOOBOOOBBOBBO
 OBOBBBBBBOBBO
 OBOBBBOOOOOOO
@@ -30,6 +29,7 @@ OOOOOOOOOOOOO
         Boarder[] boarders;
         readonly int numRows;
         readonly int numColumns;
+        readonly float turningTime = 1.0f;
 
         public BoardingPane()
         {
@@ -55,6 +55,7 @@ OOOOOOOOOOOOO
                 boarders[i] = new Boarder();
                 boarders[i].path.Add(cells[0, 3 + i]);
                 boarders[i].progress = 0.0f;
+                boarders[i].turning = turningTime;
             }
 
             boarderTexture = Game().Content.Load<Texture2D>("boarder");
@@ -96,7 +97,7 @@ OOOOOOOOOOOOO
                                        pos,
                                        null, // source rect
                                        Color.White,
-                                       0,
+                                       boarder.rotation,
                                        0.5f * new Vector2(boarderTexture.Width, boarderTexture.Height),//halfBoarderSize,// Vector2.Zero,
                                        texToScreen,
                                        SpriteEffects.None,
@@ -118,12 +119,51 @@ OOOOOOOOOOOOO
                     break;
                 }
 
-                BuildCellPath(boarder.path, 20);
+                if (boarder.path.Count < 20)
+                    BuildCellPath(boarder.path, 20);
 
                 if (boarder.progress > 1)
                 {
+                    Cell prevCell = boarder.path[0];
                     boarder.path.RemoveAt(0);
                     boarder.progress = 0;
+
+                    Cell currentCell = boarder.path[0];
+                    Cell nextCell = boarder.path[1];
+
+                    if (nextCell.row < currentCell.row && prevCell.row == currentCell.row) // going up now
+                    {
+                        boarder.prevRotation = boarder.rotation;
+                        boarder.targetRotation = (float)Math.PI;
+                        boarder.turning = turningTime;
+                    }
+                    else if (nextCell.column > currentCell.column && prevCell.row != currentCell.row) // going right now
+                    {
+                        boarder.prevRotation = boarder.rotation;
+                        boarder.targetRotation = (float)(Math.PI * 1.5f);
+                        boarder.turning = turningTime;
+                    }
+                    else if (nextCell.row > currentCell.row && prevCell.column != currentCell.column) // going down now
+                    {
+                        boarder.prevRotation = boarder.rotation;
+                        boarder.targetRotation = 0;
+                        boarder.turning = turningTime;
+                    }
+                    else if (nextCell.column < currentCell.column && prevCell.row != currentCell.row) // going left now
+                    {
+                        boarder.prevRotation = boarder.rotation;
+                        boarder.targetRotation = (float)(Math.PI * 0.5f);
+                        boarder.turning = turningTime;
+                    }
+                }
+                else if (boarder.turning > 0)
+                {
+                    boarder.turning -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    // TODO: clamp this
+
+                    // c = 1 -> starting turn, c = 0 -> ending turn
+                    float c = boarder.turning / turningTime;
+                    boarder.rotation = boarder.targetRotation * (1-c) + boarder.prevRotation * c;
                 }
                 else
                 {
@@ -207,7 +247,12 @@ OOOOOOOOOOOOO
         {
             public List<Cell> path = new List<Cell>();
             //public Cell src, dst;
+            public float turning = 0; // how much time left turning
             public float progress = 0;
+
+            public float prevRotation = 0;
+            public float targetRotation = 0;
+            public float rotation = 0;
         }
     }
 }
